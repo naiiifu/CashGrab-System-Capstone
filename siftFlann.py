@@ -1,6 +1,5 @@
 import cv2 as cv
 import os
-import matplotlib.pyplot as plt
 import json
 
 sift = cv.SIFT_create()
