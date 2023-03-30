@@ -11,6 +11,20 @@ GPIO.setup(ECHO_PIN, GPIO.IN)
 
 THRESHOLD = 5
 
+FILTER_LENGTH = 5
+averageFilter = []
+
+for i in range(0, FILTER_LENGTH):
+    averageFilter.append(0.0)
+
+def __AddToFilter(newValue):
+    for i in range(0, len(averageFilter) - 1):
+        averageFilter[i] = averageFilter[i + 1]
+    
+    averageFilter[len(averageFilter) - 1] = newValue
+
+def __GetRunningAverage():
+    return sum(averageFilter / len(averageFilter))
 
 def __GetPulseDuration():
     pulse_start_time = 0.0
