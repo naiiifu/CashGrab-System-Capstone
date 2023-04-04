@@ -58,7 +58,7 @@ def loadValidationSet(jsonFile, downscaleRatio):
     return (values, frontFeatures, backFeatures)
 
 def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures):
-    THRESHOLD = -1
+    THRESHOLD = 11
 
     value = -1
     mostMatches = -1
@@ -71,7 +71,7 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
             if m.distance < 0.7*n.distance:
                 goodMatches.append([m])
         
-        if len(goodMatches) > THRESHOLD and len(goodMatches) > mostMatches:
+        if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
     
@@ -83,10 +83,13 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
             if m.distance < 0.7*n.distance:
                 goodMatches.append([m])
         
-        if len(goodMatches) > THRESHOLD and len(goodMatches) > mostMatches:
+        if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
     
+    print("Features: " + str(mostMatches))
+    if(mostMatches< 9):#cutoff
+        return 0
     return value
 
 if __name__ == '__main__':
