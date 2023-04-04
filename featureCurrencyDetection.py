@@ -1,13 +1,12 @@
 import cv2 as cv
-import json
-import csv
 import siftFlann
 
 
 
 DOWNSCALE_RATIO = 4
+MASTER_FOLDER = "./validation.json"
 
-def checkImg(image,values, frontFeatures, backFeatures):
+def __checkImg(image,values, frontFeatures, backFeatures):
     
     #image = cv.imread(data['{}'.format(i)]['front'],cv.IMREAD_GRAYSCALE)
     
@@ -16,26 +15,43 @@ def checkImg(image,values, frontFeatures, backFeatures):
     (keypoints, descriptors) = siftFlann.getSIFTFeatures(image)
 
     value = siftFlann.getBillValue(descriptors, values, frontFeatures, backFeatures)
-    print(value)
+    #print(value)
+    return value
     
-  
+def setup(masterFolder =MASTER_FOLDER, downscaleRatio = DOWNSCALE_RATIO):
+    (values, frontFeatures, backFeatures) = siftFlann.loadValidationSet(masterFolder, downscaleRatio)
+    return (values, frontFeatures, backFeatures)
+
+
+def checkImg(values, frontFeatures, backFeatures):
+    cap = cv.VideoCapture(0)
+    ret, frame = cap.read()
+    frame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
+    cv.imshow("Frame", frame)
+    amount =  __checkImg(frame,values, frontFeatures, backFeatures)
+    #delay needed?
+    cap.release()
+    cv.destroyAllWindows()
+    return amount
+
+
+  #for testing
 if __name__ == '__main__':
-    masterFolder = "./validation.json"
-    (values, frontFeatures, backFeatures) = siftFlann.loadValidationSet(masterFolder, DOWNSCALE_RATIO)
+    print("manual")
+    (values, frontFeatures, backFeatures) = siftFlann.loadValidationSet(MASTER_FOLDER, DOWNSCALE_RATIO)
     cap = cv.VideoCapture(0)
     ret, frame = cap.read()
     frame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
     cv.imshow("Frame", frame)
 
     while True:
-
         key = cv.waitKey(1)
         if key == 99:
             ret, frame = cap.read()
             frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             cv.imshow("Frame", frame)
         if key ==100:
-            checkImg(frame,values, frontFeatures, backFeatures)
+            print(__checkImg(frame,values, frontFeatures, backFeatures))
         if key == 27:
             break
 

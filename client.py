@@ -13,7 +13,7 @@ def handle_json(json_data):
 
     # Call the control.py script with the JSON data as an argument
     result = subprocess.run(['python', 'control.py', json_data], capture_output=True, text=True)
-
+    print(result)
     # Send the result back to the server
     sio.emit('result', result.stdout.strip())
 

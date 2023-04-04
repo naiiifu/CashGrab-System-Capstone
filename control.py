@@ -1,79 +1,57 @@
 import json
 import sys
+import currencyInsertionDetector as Detector
+import motorcontrol as motor
+import featureCurrencyDetection as camera
+  
 
-# Define state constants
+  # Define state constants
 WAIT_S = 0
-SENSOR_S = 1
-TRANSACTION_S = 2
-REJECT_S = 3
-CANCEL_S = 4
+TRANSACTION_S = 1
+REJECT_S = 2
+CANCEL_S = 3
 
-# Function to read the state from the socket
-def read_socket(json_data):
-    # Read a JSON packet from the socket
-    json_data = input()
-    data = json.loads(json_data)
 
-    # Extract the 'state' value from the JSON data
-    state = data['state']
-
-    # Return the state as an integer
-    return int(state)
-
-# Function to handle the SENSOR_S state
-def handle_sensor_state(data):
-    print(data)
-    # Do something when in SENSOR_S state
+def handle_reject_state():
     pass
 
-# Function to handle the TRANSACTION_S state
-def handle_transaction_state(data):
-    print(data)
-    # Do something when in TRANSACTION_S state
-    pass
 
-# Function to handle the REJECT_S state
-def handle_reject_state(data):
-    # Do something when in REJECT_S state
-    print(data)
-    pass
-
-# Function to handle the CANCEL_S state
 def handle_cancel_state(data):
-    # Do something when in CANCEL_S state
-    print(data)
+#to cancel a transaction in progress
     pass
 
-if __name__ == '__main__':
-    # Set the initial state to WAIT_S
-    current_state = WAIT_S
-    print("Control.py running")
-    # Get the JSON data from the command-line argument
-    json_data = sys.argv[1]
-    current_state = read_socket(json_data)
-    print(current_state)
-    while True:
-        # Read the state from the socket
-        print("loop")
+current_state = WAIT_S
 
-        # Check the current state and execute the appropriate action
-        if current_state == WAIT_S:
-            print("waited twice breaking")
-            break
-            # Do something when in WAIT_S state
-            pass
-        elif current_state == SENSOR_S:
-            handle_sensor_state()
-            current_state = WAIT_S
-        elif current_state == TRANSACTION_S:
-            handle_transaction_state()
-            current_state = WAIT_S
-        elif current_state == REJECT_S:
-            handle_reject_state()
-            current_state = WAIT_S
-        elif current_state == CANCEL_S:
-            handle_cancel_state()
-            current_state = WAIT_S
-        else:
-            print(f'Invalid state value: {current_state}')
-            current_state = WAIT_S
+# Get the JSON data from the command-line argument
+json_data = sys.argv[1]
+data = json.loads(json_data)
+current_state = data['state']
+cost = data['cost']
+print(current_state)
+(values, frontFeatures, backFeatures) = camera.setup()
+while True:
+
+    if current_state == WAIT_S:
+        break
+    elif current_state == CANCEL_S:
+        handle_cancel_state(cost)
+        current_state = WAIT_S
+    elif current_state == TRANSACTION_S:
+        result = Detector.DetectInsertion()
+        if (result==False):
+            #current_state = TRANSACTION_S
+            continue
+        motor.moveToPhoto()
+        amount = camera.checkImg(values, frontFeatures, backFeatures)
+        if amount <= 0:
+            current_state = REJECT_S
+        #send message to server 
+        sys.print_to_stdout(amount)
+    elif current_state == REJECT_S:
+        handle_reject_state(current_state)
+        #send message to server?
+    
+    else:
+        sys.print_to_stdout(f'Invalid state value: {current_state}')
+
+    current_state = WAIT_S
