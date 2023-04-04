@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>JSON input</title>
+  </head>
+  <body>
+    <h1>JSON input</h1>
+    <form id="json-form">
+      <label for="message">Message:</label>
+      <input type="text" id="message" name="message"><br>
+
+      <label for="number">Number:</label>
+      <input type="number" id="number" name="number"><br>
+
+      <label for="state">State:</label>
+      <select id="state" name="state">
+        <option value="0">wait</option>
+        <option value="1">sensor</option>
+        <option value="2">transaction</option>
+        <option value="3">reject</option>
+        <option value="4">cancel</option>
+      </select><br>
+
+      <input type="submit" value="Send">
+    </form>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const form = document.getElementById('json-form');
+      const messageInput = document.getElementById('message');
+      const numberInput = document.getElementById('number');
+      const stateInput = document.getElementById('state');
+      const socket = io();
+
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const data = {
+          message: messageInput.value,
+          number: parseInt(numberInput.value),
+          state: parseInt(stateInput.value)
+        };
+
+        socket.emit('json', JSON.stringify(data));
+      });
+    </script>
+  </body>
+</html>
