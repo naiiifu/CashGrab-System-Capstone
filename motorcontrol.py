@@ -1,65 +1,60 @@
 import RPi.GPIO as GPIO
 import time
 
-#UNTESTEDD!!!
+#TODO fix awful code and deal with excpetions?
 
-# Set up the GPIO pins
-GPIO.setmode(GPIO.BOARD)
-GPIO.setup(11, GPIO.OUT)  # Motor A1
-GPIO.setup(12, GPIO.OUT)  # Motor A2
-GPIO.setup(13, GPIO.OUT)  # Motor B1
-GPIO.setup(15, GPIO.OUT)  # Motor B2
-
-# Move motors forward
-def __forward():
-    GPIO.output(11, GPIO.HIGH)
-    GPIO.output(12, GPIO.LOW)
-    GPIO.output(13, GPIO.HIGH)
-    GPIO.output(15, GPIO.LOW)
-
-# Move motors backward
-def __backward():
-    GPIO.output(11, GPIO.LOW)
-    GPIO.output(12, GPIO.HIGH)
-    GPIO.output(13, GPIO.LOW)
-    GPIO.output(15, GPIO.HIGH)
-
-# Stop motors
-def __stop():
-    GPIO.output(11, GPIO.LOW)
-    GPIO.output(12, GPIO.LOW)
-    GPIO.output(13, GPIO.LOW)
-    GPIO.output(15, GPIO.LOW)
 
 def moveToPhoto():
-    try:
-        __forward()
-        time.sleep(5)  #need to find time
-        __stop()
-    except Exception:
-        GPIO.cleanup()
-    finally:
-        GPIO.cleanup()
+    servoPIN = 27
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(servoPIN, GPIO.OUT)
+    motor = GPIO.PWM(servoPIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.start(2.5)
+    motor.ChangeDutyCycle(10)#forward
+    time.sleep(3.5)  #need to find time
+    motor.stop()
+
 
 
 def moveToStorage():
-    try:
-        __forward()
-        time.sleep(5)  #need to find time
-        __stop()
-    except Exception:
-        GPIO.cleanup()
-    finally:
-        GPIO.cleanup()
+    servoPIN = 27
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(servoPIN, GPIO.OUT)
+    motor = GPIO.PWM(servoPIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.start(2.5)
+    motor.ChangeDutyCycle(10)#forward
+    time.sleep(5)  #need to find time
+    motor.stop()
 
 
 
 def reject():
+    servoPIN = 27
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(servoPIN, GPIO.OUT)
+    motor = GPIO.PWM(servoPIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.start(2.5)
+    motor.ChangeDutyCycle(5)#backward
+    time.sleep(4)  #need to find time
+    motor.stop()
+
+        
+def cleanup():
+    GPIO.cleanup()
+        
+if __name__ == "__main__":
     try:
-        __backward()
-        time.sleep(5)  #need to find time
-        __stop()
-    except Exception:
-        GPIO.cleanup()
+        time.sleep(2)
+        moveToPhoto()
+        print("photo time(fake)")
+        time.sleep(4)
+        print("bad photo rejecting")
+        reject()
+        
+        
+    except KeyboardInterrupt:
+        cleanup()
     finally:
-        GPIO.cleanup()
+        cleanup
+        
+

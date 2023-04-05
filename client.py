@@ -4,6 +4,7 @@ import subprocess
 
 # Initialize the Socket.io client
 sio = socketio.Client()
+sio.connect('http://207.23.185.178:8080')
 
 # Define a callback function to handle the 'json' event
 @sio.on('json')
@@ -18,8 +19,8 @@ def handle_json(json_data):
     sio.emit('result', result.stdout.strip())
 
 # Connect to the server
-sio.connect('http://localhost:3001')
 
+sio.emit('result', "hello");
 # Wait for responses from the server
 print("waiting on port 3001")
 sio.wait()

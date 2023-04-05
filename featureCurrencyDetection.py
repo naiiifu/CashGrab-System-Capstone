@@ -20,7 +20,7 @@ def __checkImg(image,values, frontFeatures, backFeatures):
     
 def setup(masterFolder =MASTER_FOLDER, downscaleRatio = DOWNSCALE_RATIO):
     (values, frontFeatures, backFeatures) = siftFlann.loadValidationSet(masterFolder, downscaleRatio)
-    return (values, frontFeatures, backFeatures)
+    return values, frontFeatures, backFeatures
 
 
 def checkImg(values, frontFeatures, backFeatures):
@@ -37,7 +37,6 @@ def checkImg(values, frontFeatures, backFeatures):
 
   #for testing
 if __name__ == '__main__':
-    print("manual")
     (values, frontFeatures, backFeatures) = siftFlann.loadValidationSet(MASTER_FOLDER, DOWNSCALE_RATIO)
     cap = cv.VideoCapture(0)
     ret, frame = cap.read()
