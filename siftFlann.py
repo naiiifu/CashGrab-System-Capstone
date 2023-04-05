@@ -26,6 +26,7 @@ def compareFeatures(inputFeatures, comparisonFeatures):
     return matches
 
 def loadValidationSet(jsonFile, downscaleRatio):
+    print(jsonFile)
     file = open(jsonFile)
     data = json.load(file)
 
@@ -58,7 +59,7 @@ def loadValidationSet(jsonFile, downscaleRatio):
     return (values, frontFeatures, backFeatures)
 
 def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures):
-    THRESHOLD = 11
+    THRESHOLD = 0
 
     value = -1
     mostMatches = -1
