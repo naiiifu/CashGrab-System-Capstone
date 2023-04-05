@@ -23,35 +23,48 @@ def handle_cancel_state(data):
 current_state = WAIT_S
 
 # Get the JSON data from the command-line argument
-json_data = sys.argv[1]
-data = json.loads(json_data)
-current_state = data['state']
-cost = data['cost']
+#json_data = sys.argv[1]
+#json_data = "{"state":1}"
+#data = json.loads(json_data)
+#current_state = data['state']
+#cost = data['cost']
+current_state = TRANSACTION_S
+
+cost = 15
 print(current_state)
 (values, frontFeatures, backFeatures) = camera.setup()
+print("ready")
 while True:
-
+    
     if current_state == WAIT_S:
         break
     elif current_state == CANCEL_S:
         handle_cancel_state(cost)
         current_state = WAIT_S
     elif current_state == TRANSACTION_S:
-        result = Detector.DetectInsertion()
+        result = Detector.detect_loop()
         if (result==False):
             #current_state = TRANSACTION_S
             continue
         motor.moveToPhoto()
         amount = camera.checkImg(values, frontFeatures, backFeatures)
         if amount <= 0:
-            current_state = REJECT_S
+            # current_state = REJECT_S
+            motor.reject()
+
+        else:
+            motor.moveToStorage()
+
         #send message to server 
-        sys.print_to_stdout(amount)
+        #sys.print_to_stdout(amount)
+        print(amount)
     elif current_state == REJECT_S:
-        handle_reject_state(current_state)
+        continue
+        # handle_reject_state(current_state)
         #send message to server?
     
     else:
-        sys.print_to_stdout(f'Invalid state value: {current_state}')
+        continue
+        #sys.print_to_stdout(f'Invalid state value: {current_state}')
 
-    current_state = WAIT_S
+    # current_state = WAIT_S
