@@ -4,6 +4,7 @@ import json
 
 sift = cv.SIFT_create()
 FLANN_INDEX_KDTREE = 1
+FEATURE_CUTOFF = 13
 
 index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
 search_params = dict(checks=50)   # or pass empty dictionary
@@ -87,15 +88,10 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
         if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
-    
-    print("Features: " + str(mostMatches))
-    if(mostMatches< 9):#cutoff
+ 
+    print("Features: " + str(mostMatches) + " cutting off at " + str(FEATURE_CUTOFF))
+    if(mostMatches <FEATURE_CUTOFF):#cutoff
         return 0
     return value
 
-if __name__ == '__main__':
-    masterFolder = "./val"
-    compareImagePath = "./test/"
 
-    for imageName in os.listdir(compareImagePath):
-        masterImagePath = os.path.join(compareImagePath, imageName)

@@ -3,7 +3,8 @@ import siftFlann
 
 
 
-DOWNSCALE_RATIO = 4
+DOWNSCALE_RATIO = 3
+#MASTER_FOLDER = "./altValidation.json"
 MASTER_FOLDER = "./validation.json"
 
 def __checkImg(image,values, frontFeatures, backFeatures):
@@ -27,11 +28,11 @@ def checkImg(values, frontFeatures, backFeatures):
     cap = cv.VideoCapture(0)
     ret, frame = cap.read()
     frame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
-    cv.imshow("Frame", frame)
+    #cv.imshow("Frame", frame)
     amount =  __checkImg(frame,values, frontFeatures, backFeatures)
     #delay needed?
     cap.release()
-    cv.destroyAllWindows()
+    #cv.destroyAllWindows() #TODO  send frame back to webapp
     return amount
 
 
