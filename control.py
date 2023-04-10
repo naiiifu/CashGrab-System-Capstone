@@ -40,10 +40,8 @@ cost = data['cost']
 #print(f"curret state {current_state}")
 (values, frontFeatures, backFeatures) = camera.setup()#TODO: move this to client.py and pass values over command line
 
-if testing:
-    print("ready")
-else:
-    sys.print_to_stdout(f'State {state} cost {cost}')
+print("ready")
+
 while True:
     
     if current_state == WAIT_S:
@@ -55,45 +53,28 @@ while True:
     elif current_state == TRANSACTION_S:
         result = Detector.detect_loop()#infinite loop until sensor detects something within threshold
         if (result==False):
-            if(testing):
-                print(f'Fatal error waiting for sensor')
-                
-            else:
-                sys.print_to_stdout(f'Fatal error waiting for sensor')
+            print(f'Fatal error waiting for sensor')
             break;
         #something has been detected move bill to camera POV
         motor.moveToPhoto()
         amount = camera.checkImg(values, frontFeatures, backFeatures)
         if amount <= 0:
-            
             # current_state = REJECT_S
             motor.reject()
 
         else:
             motor.moveToStorage()
             cost = cost - amount
-
-        if(testing):
             print(f'Accepted: {amount}')
-            
-        else:
-            sys.print_to_stdout(f'Accepted: {amount}')
-            
+
         if cost<= 0:#TODO handle this in client.py
-            if(testing):
-                print(f'Transaction Complete!')
-                
-            else:
-                sys.print_to_stdout(f'Transaction Complete!')
+            print(f'Transaction Complete!')
+            
     elif current_state == REJECT_S:
         continue
         # handle_reject_state(current_state)
         #send message to server?
     else:
-        if(testing):
-            print(f'Invalid state value: {current_state}')
-            
-        else:
-            sys.print_to_stdout(f'Invalid state value: {current_state}')
+        print(f'Invalid state value: {current_state}')
         break;
 
