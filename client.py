@@ -2,6 +2,17 @@ import json
 import socketio
 import subprocess
 
+
+def createJson(line):
+    # Extract relevant data from the "Accepted" line
+    data = line.split(":")[1].split(".")[0].strip()
+    value = int(data)
+    json_data = {"inserted": value}
+    return json_data
+ 
+
+
+
 # Initialize the Socket.io client
 sio = socketio.Client()
 sio.connect('http://207.23.185.178:8080')
@@ -12,11 +23,17 @@ def handle_json(json_data):
     data = json.loads(json_data)
     print(f'Received JSON data: {data}')
 
-    # Call the control.py script with the JSON data as an argument
-    result = subprocess.run(['python', 'control.py', json_data], capture_output=True, text=True)
-    print(result)
-    # Send the result back to the server
-    sio.emit('result', result.stdout.strip())
+    # Start the control.py script as a subprocess
+    proc = subprocess.Popen(['python', 'control.py', json_data], stdout=subprocess.PIPE, text=True)
+
+    # Continuously read the output from the subprocess
+    for line in proc.stdout:
+        print(line.strip())
+        if line.startswith("Accepted"):#send amount accepeted to webapp
+            json_data = createJson(line)
+            #print(json_data['inserted'])
+            sio.emit('result',json_data)
+
 
 # Connect to the server
 

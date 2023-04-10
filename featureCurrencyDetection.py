@@ -46,11 +46,11 @@ if __name__ == '__main__':
 
     while True:
         key = cv.waitKey(1)
-        if key == 99:
+        if key == 99: #c
             ret, frame = cap.read()
             frame = cv.cvtColor(frame, cv.COLOR_BGR2GRAY)
             cv.imshow("Frame", frame)
-        if key ==100:
+        if key ==100:#d
             print(__checkImg(frame,values, frontFeatures, backFeatures))
         if key == 27:
             break
