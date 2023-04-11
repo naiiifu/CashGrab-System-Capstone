@@ -27,6 +27,10 @@ def setup(masterFolder =MASTER_FOLDER, downscaleRatio = DOWNSCALE_RATIO):
 def checkImg(values, frontFeatures, backFeatures):
     cap = cv.VideoCapture(0)
     ret, frame = cap.read()
+    frame = frame[281:704, 774:1775]
+    # cv.imshow("frame", frame)
+    # cv.waitKey(0)
+    # cv.destroyAllWindows()
     frame = cv.cvtColor(frame,cv.COLOR_BGR2GRAY)
     #cv.imshow("Frame", frame)
     amount =  __checkImg(frame,values, frontFeatures, backFeatures)

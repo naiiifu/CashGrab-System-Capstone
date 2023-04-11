@@ -4,7 +4,7 @@ import json
 
 sift = cv.SIFT_create()
 FLANN_INDEX_KDTREE = 1
-FEATURE_CUTOFF = 13
+FEATURE_CUTOFF = 10
 
 index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
 search_params = dict(checks=50)   # or pass empty dictionary

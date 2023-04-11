@@ -11,7 +11,7 @@ def moveToPhoto():
     motor = GPIO.PWM(servoPIN, 50) # GPIO 17 for PWM with 50Hz
     motor.start(2.5)
     motor.ChangeDutyCycle(10)#forward
-    time.sleep(2.7)  #need to find time
+    time.sleep(2.5)  #need to find time
     motor.stop()
 
 

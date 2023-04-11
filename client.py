@@ -15,14 +15,13 @@ def createJson(line):
 
 # Initialize the Socket.io client
 sio = socketio.Client()
-sio.connect('http://207.23.185.178:8080')
+sio.connect('http://207.23.176.230:8080')
 
 # Define a callback function to handle the 'json' event
 @sio.on('json')
 def handle_json(json_data):
-    data = json.loads(json_data)
-    print(f'Received JSON data: {data}')
 
+    print(f'Received JSON data: {json_data}')
     # Start the control.py script as a subprocess
     proc = subprocess.Popen(['python', 'control.py', json_data], stdout=subprocess.PIPE, text=True)
 
@@ -37,7 +36,7 @@ def handle_json(json_data):
 
 # Connect to the server
 
-sio.emit('result', "hello");
+#sio.emit('result', "hello");
 # Wait for responses from the server
 print("waiting on port 3001")
 sio.wait()

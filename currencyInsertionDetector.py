@@ -7,6 +7,7 @@ ECHO_PIN = 13
 SECONDS_TO_MICRO = 1 / 100000
 
 GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 GPIO.setup(TRIG_PIN, GPIO.OUT)
 GPIO.setup(ECHO_PIN, GPIO.IN)
 

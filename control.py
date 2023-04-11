@@ -31,6 +31,7 @@ if len(sys.argv) > 1:
   
 else:
     #for testing purposes
+    print("testing mode control.py")
     json_data = "{\"state\":1, \"cost\":30}"
     testing = True
 

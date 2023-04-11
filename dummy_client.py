@@ -12,10 +12,10 @@ def createJson(line):
  
 
 
-json_data = "{\"state\":1, \"cost\":350}" #sample transaction
+sample = "{\"state\":1, \"cost\":350}" #sample transaction
 
 # Start the control.py script as a subprocess
-proc = subprocess.Popen(['python', 'control.py', json_data], stdout=subprocess.PIPE, text=True)
+proc = subprocess.Popen(['python', 'control.py', sample], stdout=subprocess.PIPE, text=True)
 
 # Continuously read the output from the subprocess
 for line in proc.stdout:
