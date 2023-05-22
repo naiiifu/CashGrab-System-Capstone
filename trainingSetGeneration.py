@@ -1,7 +1,7 @@
 import json
 from json import JSONEncoder
 import cv2 as cv
-import CGK_Detect as cgk
+# import CGK_Detect as cgk
 import os
 import numpy as np
 
@@ -29,12 +29,12 @@ def recEnterPath(path):
 def getBillValue(path):
     image = cv.imread(path)
 
-    (dim4, dim8) = cgk.getCGK(image)
+    # (dim4, dim8) = cgk.getCGK(image)
 
     cv.imshow(path, cv.resize(image, (1920, 1080), interpolation = cv.INTER_AREA))
     value = cv.waitKey(0)
 
-    storeJson(path, dim4, dim8, outputTable[value - 48])
+    storeJson(path, 0, 0, outputTable[value - 48])
     cv.destroyAllWindows()
 
 def storeJson(path, dim4, dim8, value):
@@ -50,8 +50,8 @@ def storeJson(path, dim4, dim8, value):
     i = i + 1
 
 if __name__ == "__main__":
-    trainingSetPath = "./val/trainingData"
+    trainingSetPath = "./val/trainingData/raspicamNoPlexi"
     recEnterPath(trainingSetPath)
 
-    with open("trainingSet.json", "w") as outfile:
+    with open("raspiCamTrainingSet.json", "w") as outfile:
         outfile.write(json.dumps(jsonOut, indent=4, cls=NumpyArrayEncoder))
