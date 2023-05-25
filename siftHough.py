@@ -35,6 +35,7 @@ if __name__ == "__main__":
     detectedValueArray = []
     totalFeatures = []
     confidence = []
+    dbFeaturesArray = []
 
     for entry in jsonObj:
         path = entry["path"]
@@ -45,18 +46,19 @@ if __name__ == "__main__":
         # print(value)
 
         (keypoints, features) = sift.houghGetSIFTFeatures(image)
-        (detectedValue, featureCount, nextMost) = hough.GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector, True)
+        (detectedValue, featureCount, nextMost, dbFeatures) = hough.GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector, True)
 
         featureArray.append(featureCount)
         nextFeatureAray.append(nextMost)
         realValueArray.append(value)
         detectedValueArray.append(detectedValue)
         totalFeatures.append(len(features))
+        dbFeaturesArray.append(dbFeatures)
 
         p = 0.04 * 0.085 * 0.5 / 14
         k = featureCount
         n = len(features)
-        prob = specialFunctions.ibeta(k, n-k-1, p)
+        prob = specialFunctions.ibeta(k, n-k+1, p)
         print(prob)
 
         confidence.append(0.01 / (0.01 + prob))
@@ -74,4 +76,4 @@ if __name__ == "__main__":
     print(incorrectValues)
     print(confusionMatrix)
 
-    csvWriter.Write("SiftHough.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence)
+    csvWriter.Write("SiftHough.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence, dbFeaturesArray)

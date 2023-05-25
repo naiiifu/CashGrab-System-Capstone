@@ -5,6 +5,15 @@ import numpy as np
 import csvWriter
 import specialFunctions
 
+import cProfile
+import re
+
+import pstats, io
+from pstats import SortKey
+
+
+pr = cProfile.Profile()
+
 sift = cv.SIFT_create()
 FLANN_INDEX_KDTREE = 1
 FEATURE_CUTOFF = 10
@@ -77,6 +86,7 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
     value = -1
     mostMatches = -1
     nextMostMatches = -1
+    dbFeatures = -1
 
     for i in range(len(masterFrontFeatures)):
         matches = compareFeatures(inputFeatures, masterFrontFeatures[i])
@@ -92,6 +102,7 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
         if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
+            dbFeatures = len(masterFrontFeatures[i])
     
     for i in range(len(masterBackFeatures)):
         matches = compareFeatures(inputFeatures, masterBackFeatures[i])
@@ -107,15 +118,16 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
         if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
+            dbFeatures = len(masterBackFeatures[i])
  
     print("Features: " + str(mostMatches) + " cutting off at " + str(FEATURE_CUTOFF))
     if(mostMatches <FEATURE_CUTOFF):#cutoff
         # testing only to get an idea of how we can reject matches. can be removed later
         if featureCount:
-            return (0, mostMatches, nextMostMatches)
+            return (0, mostMatches, nextMostMatches, dbFeatures)
         return 0
     if featureCount:
-        return (value, mostMatches, nextMostMatches)
+        return (value, mostMatches, nextMostMatches, dbFeatures)
     return value
 
 def houghLoadValidationSet(jsonFile, downscaleRatio):
@@ -171,17 +183,20 @@ if __name__ == "__main__":
     detectedValueArray = []
     totalFeatures = []
     confidence = []
+    dbFeaturesArray = []
 
+    
+    pr.enable()
+    
     for entry in jsonObj:
         path = entry["path"]
 
         image = cv.imread(path)
         value = entry["value"]
 
-        # print(value)
 
         (keypoints, features) = getSIFTFeatures(image)
-        (detectedValue, featureCount, nextMost) = getBillValue(features, values, frontFeatures, backFeatures, True)
+        (detectedValue, featureCount, nextMost, dbFeatuers) = getBillValue(features, values, frontFeatures, backFeatures, True)
 
         
         featureArray.append(featureCount)
@@ -189,12 +204,12 @@ if __name__ == "__main__":
         realValueArray.append(value)
         detectedValueArray.append(detectedValue)
         totalFeatures.append(len(features))
+        dbFeaturesArray.append(dbFeatuers)
         
-        p = 0.04 * 0.085 * 0.5 / 14
+        p = 0.04 * 0.085 * 0.5
         k = featureCount
         n = len(features)
-        prob = specialFunctions.ibeta(k, n-k-1, p)
-        print(prob)
+        prob = specialFunctions.ibeta(k, n-k+1, p)
 
         confidence.append(0.01 / (0.01 + prob))
 
@@ -207,8 +222,15 @@ if __name__ == "__main__":
         else:
             incorrectValues = incorrectValues + 1
     
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
+
     print(correctValues)
     print(incorrectValues)
     print(confusionMatrix)
 
-    csvWriter.Write("SiftFlann.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence)
+    csvWriter.Write("SiftFlann.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence, dbFeaturesArray)

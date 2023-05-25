@@ -138,6 +138,7 @@ def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector,
 
     mostMatches = 0
     nextMostMatches = 0
+    dbFeatures = 0
 
     for i in range(len(frontFeatureVector)):
         matches = matcher.knnMatch(features,frontFeatureVector[i],k=2)
@@ -155,6 +156,7 @@ def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector,
         if len(filteredMatches) > mostMatches:
             mostMatches = len(filteredMatches)
             value = values[i]
+            dbFeatures = len(frontFeatureVector[i])
     
     for i in range(len(backFeatureVector)):
         matches = matcher.knnMatch(features,backFeatureVector[i],k=2)
@@ -172,12 +174,13 @@ def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector,
         if len(filteredMatches) > mostMatches:
             mostMatches = len(filteredMatches)
             value = values[i]
+            dbFeatures = len(backFeatureVector[i])
     
     if mostMatches >= FEATURE_THRESHOLD:
         if featureCount:
-            return (value, mostMatches, nextMostMatches)
+            return (value, mostMatches, nextMostMatches, dbFeatures)
         return value
     if featureCount:
-        return (0, mostMatches, nextMostMatches)
+        return (0, mostMatches, nextMostMatches, dbFeatures)
     return value
 

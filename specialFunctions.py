@@ -68,7 +68,7 @@ def betacf(a, b, x):
 
         if (math.fabs(dl-1.0) < EPS):
             break
-
+            
     if (m > MAXIT):
         return math.nan
     
