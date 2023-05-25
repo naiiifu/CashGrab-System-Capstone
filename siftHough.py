@@ -3,6 +3,8 @@ import cv2 as cv
 import json
 import hough
 import numpy as np
+import csvWriter
+import specialFunctions
 
 validationSetJsonPath = "./raspiCamTrainingSet.json"
 
@@ -27,19 +29,37 @@ if __name__ == "__main__":
     correctValues = 0
     incorrectValues = 0
 
+    featureArray = []
+    nextFeatureAray = []
+    realValueArray = []
+    detectedValueArray = []
+    totalFeatures = []
+    confidence = []
+
     for entry in jsonObj:
         path = entry["path"]
 
         image = cv.imread(path)
         value = entry["value"]
 
-        if(value == 0):
-            continue
-
         # print(value)
 
         (keypoints, features) = sift.houghGetSIFTFeatures(image)
-        detectedValue = hough.GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector)
+        (detectedValue, featureCount, nextMost) = hough.GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector, True)
+
+        featureArray.append(featureCount)
+        nextFeatureAray.append(nextMost)
+        realValueArray.append(value)
+        detectedValueArray.append(detectedValue)
+        totalFeatures.append(len(features))
+
+        p = 0.04 * 0.085 * 0.5 / 14
+        k = featureCount
+        n = len(features)
+        prob = specialFunctions.ibeta(k, n-k-1, p)
+        print(prob)
+
+        confidence.append(0.01 / (0.01 + prob))
 
         detectedValueIndex = confusionIndexTable[detectedValue]
         realValueIndex = confusionIndexTable[value]
@@ -53,3 +73,5 @@ if __name__ == "__main__":
     print(correctValues)
     print(incorrectValues)
     print(confusionMatrix)
+
+    csvWriter.Write("SiftHough.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence)

@@ -132,11 +132,12 @@ def Transform(kps1, kps2, goodMatches):
 
     return output
 
-def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector):
+def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector, featureCount = False):
     FEATURE_THRESHOLD = 0
     DISTANCE_RATIO = 0.7
 
     mostMatches = 0
+    nextMostMatches = 0
 
     for i in range(len(frontFeatureVector)):
         matches = matcher.knnMatch(features,frontFeatureVector[i],k=2)
@@ -147,6 +148,9 @@ def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector,
                 goodMatches.append(m)
         
         filteredMatches = Transform(keypoints, frontFeatures[i], goodMatches)
+
+        if len(filteredMatches) <= mostMatches and len(filteredMatches) > nextMostMatches:
+            nextMostMatches = len(filteredMatches)
 
         if len(filteredMatches) > mostMatches:
             mostMatches = len(filteredMatches)
@@ -162,12 +166,18 @@ def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector,
         
         filteredMatches = Transform(keypoints, backFeatures[i], goodMatches)
 
+        if len(filteredMatches) <= mostMatches and len(filteredMatches) > nextMostMatches:
+            nextMostMatches = len(filteredMatches)
+
         if len(filteredMatches) > mostMatches:
             mostMatches = len(filteredMatches)
             value = values[i]
     
     if mostMatches >= FEATURE_THRESHOLD:
+        if featureCount:
+            return (value, mostMatches, nextMostMatches)
         return value
-    
-    return 0
+    if featureCount:
+        return (0, mostMatches, nextMostMatches)
+    return value
 

@@ -2,6 +2,8 @@ import cv2 as cv
 import os
 import json
 import numpy as np
+import csvWriter
+import specialFunctions
 
 sift = cv.SIFT_create()
 FLANN_INDEX_KDTREE = 1
@@ -69,11 +71,12 @@ def loadValidationSet(jsonFile, downscaleRatio):
 
     return (values, frontFeatures, backFeatures)
 
-def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures):
+def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures, featureCount = False):
     THRESHOLD = 0
 
     value = -1
     mostMatches = -1
+    nextMostMatches = -1
 
     for i in range(len(masterFrontFeatures)):
         matches = compareFeatures(inputFeatures, masterFrontFeatures[i])
@@ -82,7 +85,10 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
         for m,n in matches:
             if m.distance < 0.7*n.distance:
                 goodMatches.append([m])
-        
+                
+        if len(goodMatches) <= mostMatches and len(goodMatches) > nextMostMatches:
+            nextMostMatches = len(goodMatches)
+
         if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
@@ -95,13 +101,21 @@ def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFea
             if m.distance < 0.7*n.distance:
                 goodMatches.append([m])
         
+        if len(goodMatches) <= mostMatches and len(goodMatches) > nextMostMatches:
+            nextMostMatches = len(goodMatches)
+
         if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
             mostMatches = len(goodMatches)
             value = masterValues[i]
  
     print("Features: " + str(mostMatches) + " cutting off at " + str(FEATURE_CUTOFF))
     if(mostMatches <FEATURE_CUTOFF):#cutoff
+        # testing only to get an idea of how we can reject matches. can be removed later
+        if featureCount:
+            return (0, mostMatches, nextMostMatches)
         return 0
+    if featureCount:
+        return (value, mostMatches, nextMostMatches)
     return value
 
 def houghLoadValidationSet(jsonFile, downscaleRatio):
@@ -151,19 +165,38 @@ if __name__ == "__main__":
     correctValues = 0
     incorrectValues = 0
 
+    featureArray = []
+    nextFeatureAray = []
+    realValueArray = []
+    detectedValueArray = []
+    totalFeatures = []
+    confidence = []
+
     for entry in jsonObj:
         path = entry["path"]
 
         image = cv.imread(path)
         value = entry["value"]
 
-        if(value == 0):
-            continue
-
         # print(value)
 
         (keypoints, features) = getSIFTFeatures(image)
-        detectedValue = getBillValue(features, values, frontFeatures, backFeatures)
+        (detectedValue, featureCount, nextMost) = getBillValue(features, values, frontFeatures, backFeatures, True)
+
+        
+        featureArray.append(featureCount)
+        nextFeatureAray.append(nextMost)
+        realValueArray.append(value)
+        detectedValueArray.append(detectedValue)
+        totalFeatures.append(len(features))
+        
+        p = 0.04 * 0.085 * 0.5 / 14
+        k = featureCount
+        n = len(features)
+        prob = specialFunctions.ibeta(k, n-k-1, p)
+        print(prob)
+
+        confidence.append(0.01 / (0.01 + prob))
 
         detectedValueIndex = confusionIndexTable[detectedValue]
         realValueIndex = confusionIndexTable[value]
@@ -177,3 +210,5 @@ if __name__ == "__main__":
     print(correctValues)
     print(incorrectValues)
     print(confusionMatrix)
+
+    csvWriter.Write("SiftFlann.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence)
