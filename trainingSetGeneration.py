@@ -14,6 +14,8 @@ class NumpyArrayEncoder(JSONEncoder):
     def default(self, obj):
         if isinstance(obj, np.ndarray):
             return obj.tolist()
+        if isinstance(obj, cv.KeyPoint):
+            return {"angle": obj.angle, "class_id": obj.class_id, "octave": obj.octave, "pt": [obj.pt[0], obj.pt[1]], "response": obj.response, "size": obj.size}
         return JSONEncoder.default(self, obj)
     
 def recEnterPath(path):

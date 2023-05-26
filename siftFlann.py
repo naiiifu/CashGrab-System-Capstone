@@ -11,17 +11,19 @@ import re
 import pstats, io
 from pstats import SortKey
 
+import threading
 
 pr = cProfile.Profile()
 
 sift = cv.SIFT_create()
 FLANN_INDEX_KDTREE = 1
-FEATURE_CUTOFF = 10
+FEATURE_CUTOFF = 1
 
 index_params = dict(algorithm = FLANN_INDEX_KDTREE, trees = 5)
 search_params = dict(checks=50)   # or pass empty dictionary
 
 flann = cv.FlannBasedMatcher(index_params,search_params)
+# flann = cv.DescriptorMatcher_create(cv.DescriptorMatcher_FLANNBASED)
 
 confusionIndexTable = {0: 0, 5: 1, 10: 2, 20: 3, 50: 4, 100: 5}
 confusionMatrix = np.zeros((6, 6), dtype=np.uint)
@@ -29,6 +31,9 @@ confusionMatrix = np.zeros((6, 6), dtype=np.uint)
 def downScale(image, scale):
     targetDim = (int(image.shape[1] / scale), int(image.shape[0] / scale))
     resized = cv.resize(image, targetDim, interpolation = cv.INTER_AREA)
+
+    # cv.imshow("", resized)
+    # cv.waitKey(0)
 
     return resized
 
@@ -57,8 +62,8 @@ def loadValidationSet(jsonFile, downscaleRatio):
     values = []
 
     for i in range(1, len(data) + 1):
-        frontImage = cv.imread(data['{}'.format(i)]['front'],cv.IMREAD_GRAYSCALE)
-        backImage = cv.imread(data['{}'.format(i)]['back'],cv.IMREAD_GRAYSCALE)
+        frontImage = cv.imread(data['{}'.format(i)]['front'])
+        backImage = cv.imread(data['{}'.format(i)]['back'])
 
         frontImage = downScale(frontImage, downscaleRatio)
         backImage = downScale(backImage, downscaleRatio)
@@ -69,65 +74,115 @@ def loadValidationSet(jsonFile, downscaleRatio):
 
     frontFeatures = []
     backFeatures = []
+    frontPositions = []
+    backPositions = []
 
     for i in range(len(frontImages)):
         (keypoints, descriptors) = getSIFTFeatures(frontImages[i])
         frontFeatures.append(descriptors)
+        frontPositions.append(keypoints)
 
     for i in range(len(backImages)):
         (keypoints, descriptors) = getSIFTFeatures(backImages[i])
         backFeatures.append(descriptors)
+        backPositions.append(keypoints)
 
-    return (values, frontFeatures, backFeatures)
+    return (values, frontFeatures, backFeatures, frontPositions, backPositions)
 
-def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures, featureCount = False):
-    THRESHOLD = 0
-
+def getBillValue(inputKeypoints, inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures, masterFrontPositions, masterBackPositions, featureCount = False):
+# def getBillValue(inputFeatures, masterValues, masterFrontFeatures, masterBackFeatures, featureCount = False):
+    global mostMatches
+    global nextMostMatches
+    global dbFeatures
+    global value
+    global matchesSet
+    global otherFeatures
+    
     value = -1
     mostMatches = -1
     nextMostMatches = -1
     dbFeatures = -1
+    matchesSet = []
+    otherFeatures = []
+
+    lock = threading.Lock()
+
+    def CompareImages(index, isFront):
+        global mostMatches
+        global nextMostMatches
+        global dbFeatures
+        global value
+        global matchesSet
+        global otherFeatures
+
+        if isFront:
+            matchSet = masterFrontFeatures[index]
+            positionSet = masterFrontPositions[index]
+        else:
+            matchSet = masterBackFeatures[index]
+            positionSet = masterBackPositions[index]
+
+        matches = compareFeatures(inputFeatures, matchSet)
+
+        goodMatches = []
+        for m,n in matches:
+            if m.distance < 0.7*n.distance:
+                goodMatches.append(m)
+
+        obj = np.empty((len(goodMatches),2), dtype=np.float32)
+        scene = np.empty((len(goodMatches),2), dtype=np.float32)
+        for i in range(len(goodMatches)):
+            #-- Get the keypoints from the good matches
+            obj[i,0] = inputKeypoints[goodMatches[i].queryIdx].pt[0]
+            obj[i,1] = inputKeypoints[goodMatches[i].queryIdx].pt[1]
+            scene[i,0] = positionSet[goodMatches[i].trainIdx].pt[0]
+            scene[i,1] = positionSet[goodMatches[i].trainIdx].pt[1]
+
+        if len(obj) >= 4:
+            # H, mask =  cv.findHomography(obj, scene, cv.RANSAC)
+
+            # inliers = 0
+            # for i in range(0, len(mask)):
+            #     if goodMatches[i] and mask[i]:
+            #         inliers = inliers + 1
+
+            inliers = len(goodMatches)
+
+            lock.acquire() 
+            if inliers <= mostMatches and inliers > nextMostMatches:
+                nextMostMatches = len(goodMatches)
+
+            if inliers >= FEATURE_CUTOFF and inliers > mostMatches:
+                mostMatches = inliers
+                value = masterValues[index]
+                dbFeatures = len(matchSet)
+                matchesSet = goodMatches
+                otherFeatures = matchSet
+            lock.release()
+
+    threadList = []
 
     for i in range(len(masterFrontFeatures)):
-        matches = compareFeatures(inputFeatures, masterFrontFeatures[i])
-
-        goodMatches = []
-        for m,n in matches:
-            if m.distance < 0.7*n.distance:
-                goodMatches.append([m])
-                
-        if len(goodMatches) <= mostMatches and len(goodMatches) > nextMostMatches:
-            nextMostMatches = len(goodMatches)
-
-        if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
-            mostMatches = len(goodMatches)
-            value = masterValues[i]
-            dbFeatures = len(masterFrontFeatures[i])
+        thread = threading.Thread(target = CompareImages, args=(i, True))
+        thread.start()
+        threadList.append(thread)
     
     for i in range(len(masterBackFeatures)):
-        matches = compareFeatures(inputFeatures, masterBackFeatures[i])
-
-        goodMatches = []
-        for m,n in matches:
-            if m.distance < 0.7*n.distance:
-                goodMatches.append([m])
-        
-        if len(goodMatches) <= mostMatches and len(goodMatches) > nextMostMatches:
-            nextMostMatches = len(goodMatches)
-
-        if len(goodMatches) >= THRESHOLD and len(goodMatches) > mostMatches:
-            mostMatches = len(goodMatches)
-            value = masterValues[i]
-            dbFeatures = len(masterBackFeatures[i])
+        thread = threading.Thread(target = CompareImages, args=(i, False))
+        thread.start()
+        threadList.append(thread)
+    
+    for thread in threadList:
+        thread.join()
  
     print("Features: " + str(mostMatches) + " cutting off at " + str(FEATURE_CUTOFF))
     if(mostMatches <FEATURE_CUTOFF):#cutoff
         # testing only to get an idea of how we can reject matches. can be removed later
         if featureCount:
-            return (0, mostMatches, nextMostMatches, dbFeatures)
+            return (0, mostMatches, nextMostMatches, dbFeatures, matchesSet, otherFeatures)
         return 0
     if featureCount:
-        return (value, mostMatches, nextMostMatches, dbFeatures)
+        return (value, mostMatches, nextMostMatches, dbFeatures, matchesSet, otherFeatures)
     return value
 
 def houghLoadValidationSet(jsonFile, downscaleRatio):
@@ -166,10 +221,93 @@ def houghLoadValidationSet(jsonFile, downscaleRatio):
 
     return (values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector)
 
-if __name__ == "__main__":
+def ToCVKeypoint(data):
+    keypoint: cv.KeyPoint
+
+    # {"angle": obj.angle, "class_id": obj.class_id, "octave": obj.octave, "pt": [obj.pt[0], obj.pt[1]], "response": obj.response, "size": obj.size}
+    
+    keypoint.angle = data["angle"]
+    keypoint.class_id = data["class_id"]
+    keypoint.octave = data["octave"]
+    keypoint.pt = data["pt"]
+    keypoint.response = data["response"]
+    keypoint.size = data["size"]
+
+    return keypoint
+
+def setUp():
+    global values, frontFeatures, backFeatures, frontPositions, backPositions
+    values = []
+    frontFeatures = []
+    backFeatures = []
+    frontPositions = []
+    backPositions = []
+
+    SERIALIZED_JSON_FILE = "serializedValidataion.json"
+
+    file = open(SERIALIZED_JSON_FILE)
+    data = json.load(file)
+
+    for entry in data:
+        values.append(entry["value"])
+        frontFeatures.append(np.array(entry["frontFeatures"], dtype=np.float32))
+        backFeatures.append(np.array(entry["backFeatures"], dtype=np.float32))
+        frontPositions.append(np.array(entry["frontPositions"], dtype=np.float32))
+        backPositions.append(np.array(entry["backPositions"], dtype=np.float32))
+
+def detect(image, extra = False):
+    global values, frontFeatures, backFeatures
+    (keypoints, features) = getSIFTFeatures(image)
+
+    detectedValue = getBillValue(keypoints, features, values, frontFeatures, backFeatures, frontPositions, backPositions, extra)
+
+    return (features, detectedValue)
+
+def PerfTest():
     validationSetJsonPath = "./raspiCamTrainingSet.json"
 
-    (values, frontFeatures, backFeatures) = loadValidationSet("./validation.json", 1)
+    jsonFile = open(validationSetJsonPath)
+    jsonObj = json.load(jsonFile)
+
+    correctValues = 0
+    incorrectValues = 0
+
+    setUp()
+    
+    pr.enable()
+    
+    for entry in jsonObj:
+        path = entry["path"]
+
+        image = cv.imread(path)
+        value = entry["value"]
+
+        detectedValue = detect(image)
+
+        detectedValueIndex = confusionIndexTable[detectedValue]
+        realValueIndex = confusionIndexTable[value]
+        confusionMatrix[detectedValueIndex][realValueIndex] = confusionMatrix[detectedValueIndex][realValueIndex] + 1
+
+        if detectedValue == value:
+            correctValues = correctValues + 1
+        else:
+            incorrectValues = incorrectValues + 1
+    
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
+
+    print(correctValues)
+    print(incorrectValues)
+    print(confusionMatrix)
+
+def AccuracyTest():
+    validationSetJsonPath = "./raspiCamTrainingSet.json"
+
+    (values, frontFeatures, backFeatures, frontPositions, backPositions) = loadValidationSet("./validation.json", 1)
 
     jsonFile = open(validationSetJsonPath)
     jsonObj = json.load(jsonFile)
@@ -196,7 +334,7 @@ if __name__ == "__main__":
 
 
         (keypoints, features) = getSIFTFeatures(image)
-        (detectedValue, featureCount, nextMost, dbFeatuers) = getBillValue(features, values, frontFeatures, backFeatures, True)
+        (detectedValue, featureCount, nextMost, dbFeatuers, matchesSet, otherFeatures) = getBillValue(keypoints, features, values, frontFeatures, backFeatures, frontPositions, backPositions, True)
 
         
         featureArray.append(featureCount)
@@ -234,3 +372,6 @@ if __name__ == "__main__":
     print(confusionMatrix)
 
     csvWriter.Write("SiftFlann.csv", featureArray, nextFeatureAray, realValueArray, detectedValueArray, totalFeatures, confidence, dbFeaturesArray)
+
+if __name__ == "__main__":
+    AccuracyTest()
