@@ -13,3 +13,6 @@ def Write(path, features, nextMostFeatures, actualValue, detectedValue, totalFea
             writer.writerow([features[i],nextMostFeatures[i],actualValue[i],detectedValue[i], totalFeatures[i], confidence[i], dbFeatures[i]])
         
         file.close()
+
+def HistWrite():
+    return

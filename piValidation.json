@@ -1,0 +1,27 @@
+{
+    "1": {
+        "front": "./val/piVal/14.png",
+        "back": "./val/piVal/17.png",
+        "value": 5
+    },
+    "2": {
+        "front": "./val/piVal/22.png",
+        "back": "./val/piVal/24.png",
+        "value": 10
+    },
+    "3": {
+        "front": "./val/piVal/30.png",
+        "back": "./val/piVal/31.png",
+        "value": 20
+    },
+    "4": {
+        "front": "./val/piVal/46.png",
+        "back": "./val/piVal/48.png",
+        "value": 50
+    },
+    "5": {
+        "front": "./val/piVal/62.png",
+        "back": "./val/piVal/64.png",
+        "value": 100
+    }
+}

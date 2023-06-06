@@ -1,5 +1,6 @@
 import cv2 as cv
 import math
+import numpy as np
 
 BIN_COUNT_THRESHOLD = 3
 
@@ -56,8 +57,6 @@ def _UniformMidtreadQuantize(value, step):
     return [quantizedValue, edgeAltValue]
 
 def _StoreDifKeypoint(kp1, kp2, match):
-    binValue = HoughBin()
-
     difAngle = kp1.angle - kp2.angle
     difScale = kp1.size - kp2.size
     difXPos  = kp1.pt[0] - kp2.pt[0]
@@ -75,10 +74,7 @@ def _StoreDifKeypoint(kp1, kp2, match):
         for j in scaleBins:
             for k in xBins:
                 for l in yBins:
-                    binValue.quantizedAngle = i
-                    binValue.quantizedScale = j
-                    binValue.quantizedXPoint = k
-                    binValue.quantizedYPoint = l
+                    binValue = HoughBin(i, j, k, l)
 
                     (count, matches) = houghMap.get(binValue, (0, list()))
                     if(count == 0):
@@ -104,12 +100,13 @@ def SetUp(trainingImageDescriptors):
                 maxPosition = descriptor.pt[1]
     
     global positionQuantizeStep
-    positionQuantizeStep = maxPosition * 0.25
+    # positionQuantizeStep = maxPosition * 0.25
+    positionQuantizeStep = 160
 
     global matcher
     matcher = cv.DescriptorMatcher_create(cv.DescriptorMatcher_FLANNBASED)
 
-def Transform(kps1, kps2, goodMatches):
+def HoughTransform(kps1, kps2, goodMatches):
     global houghMap
     houghMap.clear()
 
@@ -117,64 +114,127 @@ def Transform(kps1, kps2, goodMatches):
         kp1 = kps1[match.queryIdx]
         kp2 = kps2[match.trainIdx]
         _StoreDifKeypoint(kp1, kp2, match)
-    
-    outputMap = dict()
-    output = []
 
-    for (count, matches) in houghMap.values():
-        if count >= BIN_COUNT_THRESHOLD:
-            for match in matches:
-                outputMap.update({match : match})
+    return houghMap
+    
+    # outputMap = dict()
+    # output = []
+
+    # for (count, matches) in houghMap.values():
+    #     if count >= BIN_COUNT_THRESHOLD:
+    #         for match in matches:
+    #             outputMap.update({match : match})
     
     # i've truely outdone myself with how bad this code is
-    for match in outputMap.values():
-        output.append(match)
+    # for match in outputMap.values():
+    #     output.append(match)
 
-    return output
+    # return output
+
+def GetGoodMatches(inputFeatures, testFeatures):
+    DISTANCE_RATIO = 0.7
+    matches = matcher.knnMatch(inputFeatures,testFeatures,k=2)
+
+    goodMatches = []
+    for m,n in matches:
+        if m.distance < DISTANCE_RATIO*n.distance:
+            goodMatches.append(m)
+    
+    return (matches, goodMatches)
+
+def GetMatchingPoints(matches, inputKeypoints, testKeypoints):
+    inputPositions = []
+    testPositions = []
+
+    for match in matches:
+        inputKeypoint = inputKeypoints[match.queryIdx]
+        inputPositions.append(inputKeypoint.pt)
+
+        testKeypoint = testKeypoints[match.trainIdx]
+        testPositions.append(testKeypoint.pt)
+
+    inputPositions = np.array(inputPositions, dtype=np.float32)
+    testPositions = np.array(testPositions, dtype=np.float32)
+    return (inputPositions, testPositions)
+
+def GetAffineInliers(inputKeypoints, featureMatches,  testKeypoints, transform):
+    global positionQuantizeStep
+
+    if(transform[0] is None):
+        return 0
+
+    errorThreshold = 40 * 40
+
+    transform = np.array(transform[0], dtype=np.float32)
+
+    m = transform[0:2, 0:2]
+    t = transform[0:2, 2]
+
+    inliers = 0
+    
+    for (match, _other) in featureMatches:
+        inputPoint =  inputKeypoints[match.queryIdx]
+        inputPoint = np.array(inputPoint.pt, dtype=np.float32)
+
+        testPoint = testKeypoints[match.trainIdx]
+        testPoint = np.array(testPoint.pt, dtype=np.float32)
+
+        
+        transformedInput = np.matmul(inputPoint, m)
+        transformedInput = transformedInput + t
+
+        deltaPosition = testPoint - transformedInput
+
+        if np.dot(deltaPosition, deltaPosition) < errorThreshold:
+            inliers = inliers + 1
+
+    return inliers
+
 
 def GetBillValue(keypoints, features, values, frontFeatures, frontFeatureVector, backFeatures, backFeatureVector, featureCount = False):
     FEATURE_THRESHOLD = 0
-    DISTANCE_RATIO = 0.7
 
     mostMatches = 0
     nextMostMatches = 0
     dbFeatures = 0
 
     for i in range(len(frontFeatureVector)):
-        matches = matcher.knnMatch(features,frontFeatureVector[i],k=2)
-
-        goodMatches = []
-        for m,n in matches:
-            if m.distance < DISTANCE_RATIO*n.distance:
-                goodMatches.append(m)
+        (featureMatches, goodMatches) = GetGoodMatches(features, frontFeatureVector[i])
         
-        filteredMatches = Transform(keypoints, frontFeatures[i], goodMatches)
+        houghTransform = HoughTransform(keypoints, frontFeatures[i], goodMatches)
 
-        if len(filteredMatches) <= mostMatches and len(filteredMatches) > nextMostMatches:
-            nextMostMatches = len(filteredMatches)
+        for (count, matches) in houghTransform.values():
+            if count >= BIN_COUNT_THRESHOLD:
+                (inputPoints, testPoints) = GetMatchingPoints(matches, keypoints, frontFeatures[i])
+                affineTransform = cv.estimateAffine2D(inputPoints, testPoints)
+                inliers = GetAffineInliers(keypoints, featureMatches, frontFeatures[i], affineTransform)
 
-        if len(filteredMatches) > mostMatches:
-            mostMatches = len(filteredMatches)
-            value = values[i]
-            dbFeatures = len(frontFeatureVector[i])
+                if inliers > mostMatches:
+                    mostMatches = inliers
+                    value = values[i]
+
+        # if len(filteredMatches) <= mostMatches and len(filteredMatches) > nextMostMatches:
+        #     nextMostMatches = len(filteredMatches)
+
+        # if len(filteredMatches) > mostMatches:
+        #     mostMatches = len(filteredMatches)
+        #     value = values[i]
+        #     dbFeatures = len(frontFeatureVector[i])
     
     for i in range(len(backFeatureVector)):
-        matches = matcher.knnMatch(features,backFeatureVector[i],k=2)
-
-        goodMatches = []
-        for m,n in matches:
-            if m.distance < DISTANCE_RATIO*n.distance:
-                goodMatches.append(m)
+        (featureMatches, goodMatches) = GetGoodMatches(features, backFeatureVector[i])
         
-        filteredMatches = Transform(keypoints, backFeatures[i], goodMatches)
+        houghTransform = HoughTransform(keypoints, backFeatures[i], goodMatches)
 
-        if len(filteredMatches) <= mostMatches and len(filteredMatches) > nextMostMatches:
-            nextMostMatches = len(filteredMatches)
+        for (count, matches) in houghTransform.values():
+            if count >= BIN_COUNT_THRESHOLD:
+                (inputPoints, testPoints) = GetMatchingPoints(matches, keypoints, backFeatures[i])
+                affineTransform = cv.estimateAffine2D(inputPoints, testPoints)
+                inliers = GetAffineInliers(keypoints, featureMatches, backFeatures[i], affineTransform)
 
-        if len(filteredMatches) > mostMatches:
-            mostMatches = len(filteredMatches)
-            value = values[i]
-            dbFeatures = len(backFeatureVector[i])
+                if inliers > mostMatches:
+                    mostMatches = inliers
+                    value = values[i]
     
     if mostMatches >= FEATURE_THRESHOLD:
         if featureCount:

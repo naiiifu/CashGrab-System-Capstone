@@ -63,7 +63,17 @@ def loadValidationSet(jsonFile, downscaleRatio):
 
     for i in range(1, len(data) + 1):
         frontImage = cv.imread(data['{}'.format(i)]['front'])
+        frontSize = frontImage.shape
+        frontCrop = frontSize[1] / 2
+        frontCrop = int(frontCrop)
+        frontImage = frontImage[0:frontCrop, 0:frontSize[0]]
+        
+
         backImage = cv.imread(data['{}'.format(i)]['back'])
+        backSize = backImage.shape
+        backCrop = backSize[1] / 2
+        backCrop = int(backCrop)
+        backImage = backImage[0:backCrop, 0:backSize[0]]
 
         frontImage = downScale(frontImage, downscaleRatio)
         backImage = downScale(backImage, downscaleRatio)
@@ -105,9 +115,15 @@ def getBillValue(inputKeypoints, inputFeatures, masterValues, masterFrontFeature
     matchesSet = []
     otherFeatures = []
 
-    lock = threading.Lock()
+    # lock = threading.Lock()
 
-    def CompareImages(index, isFront):
+    global valuesArray
+    global featureCountArray
+
+    valuesArray = []
+    featureCountArray = []
+
+    def CompareImages(index, isFront, answerIndex):
         global mostMatches
         global nextMostMatches
         global dbFeatures
@@ -115,12 +131,15 @@ def getBillValue(inputKeypoints, inputFeatures, masterValues, masterFrontFeature
         global matchesSet
         global otherFeatures
 
+        global valuesArray
+        global featureCountArray
+
         if isFront:
             matchSet = masterFrontFeatures[index]
-            positionSet = masterFrontPositions[index]
+            # positionSet = masterFrontPositions[index]
         else:
             matchSet = masterBackFeatures[index]
-            positionSet = masterBackPositions[index]
+            # positionSet = masterBackPositions[index]
 
         matches = compareFeatures(inputFeatures, matchSet)
 
@@ -129,51 +148,54 @@ def getBillValue(inputKeypoints, inputFeatures, masterValues, masterFrontFeature
             if m.distance < 0.7*n.distance:
                 goodMatches.append(m)
 
-        obj = np.empty((len(goodMatches),2), dtype=np.float32)
-        scene = np.empty((len(goodMatches),2), dtype=np.float32)
-        for i in range(len(goodMatches)):
-            #-- Get the keypoints from the good matches
-            obj[i,0] = inputKeypoints[goodMatches[i].queryIdx].pt[0]
-            obj[i,1] = inputKeypoints[goodMatches[i].queryIdx].pt[1]
-            scene[i,0] = positionSet[goodMatches[i].trainIdx].pt[0]
-            scene[i,1] = positionSet[goodMatches[i].trainIdx].pt[1]
+        inliers = len(goodMatches)
 
-        if len(obj) >= 4:
-            # H, mask =  cv.findHomography(obj, scene, cv.RANSAC)
+        valuesArray[answerIndex] = masterValues[index]
+        featureCountArray[answerIndex] = inliers
 
-            # inliers = 0
-            # for i in range(0, len(mask)):
-            #     if goodMatches[i] and mask[i]:
-            #         inliers = inliers + 1
+        """
+        lock.acquire() 
+        if inliers <= mostMatches and inliers > nextMostMatches:
+            nextMostMatches = len(goodMatches)
 
-            inliers = len(goodMatches)
-
-            lock.acquire() 
-            if inliers <= mostMatches and inliers > nextMostMatches:
-                nextMostMatches = len(goodMatches)
-
-            if inliers >= FEATURE_CUTOFF and inliers > mostMatches:
-                mostMatches = inliers
-                value = masterValues[index]
-                dbFeatures = len(matchSet)
-                matchesSet = goodMatches
-                otherFeatures = matchSet
-            lock.release()
+        if inliers >= FEATURE_CUTOFF and inliers > mostMatches:
+            mostMatches = inliers
+            value = masterValues[index]
+            dbFeatures = len(matchSet)
+            matchesSet = goodMatches
+            otherFeatures = matchSet
+        lock.release()
+        """
 
     threadList = []
 
+    answerIndex = 0
+
     for i in range(len(masterFrontFeatures)):
-        thread = threading.Thread(target = CompareImages, args=(i, True))
+        valuesArray.append(0)
+        featureCountArray.append(0)
+
+        thread = threading.Thread(target = CompareImages, args=(i, True, answerIndex))
         thread.start()
         threadList.append(thread)
+        answerIndex = answerIndex + 1
     
     for i in range(len(masterBackFeatures)):
-        thread = threading.Thread(target = CompareImages, args=(i, False))
+        valuesArray.append(0)
+        featureCountArray.append(0)
+
+        thread = threading.Thread(target = CompareImages, args=(i, False, answerIndex))
         thread.start()
         threadList.append(thread)
+        answerIndex = answerIndex + 1
     
     for thread in threadList:
         thread.join()
+
+    for i in range(0, len(valuesArray)):
+        if featureCountArray[i] >= FEATURE_CUTOFF and featureCountArray[i] > mostMatches:
+            mostMatches = featureCountArray[i]
+            value = valuesArray[i]
  
     print("Features: " + str(mostMatches) + " cutting off at " + str(FEATURE_CUTOFF))
     if(mostMatches <FEATURE_CUTOFF):#cutoff
@@ -281,7 +303,7 @@ def PerfTest():
 
         image = cv.imread(path)
         value = entry["value"]
-
+        
         detectedValue = detect(image)
 
         detectedValueIndex = confusionIndexTable[detectedValue]
@@ -332,7 +354,7 @@ def AccuracyTest():
         image = cv.imread(path)
         value = entry["value"]
 
-
+        image = downScale(image, 2)
         (keypoints, features) = getSIFTFeatures(image)
         (detectedValue, featureCount, nextMost, dbFeatuers, matchesSet, otherFeatures) = getBillValue(keypoints, features, values, frontFeatures, backFeatures, frontPositions, backPositions, True)
 
