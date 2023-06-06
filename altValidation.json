@@ -1,0 +1,62 @@
+{
+    "1": {
+        "front": "./altVal/0.png",
+        "back": "./altVal/2.png",
+        "value": 5
+    },
+    "2": {
+        "front": "./altVal/1.png",
+        "back": "./altVal/3.png",
+        "value": 5
+    },
+    "3": {
+        "front": "./altVal/4.png",
+        "back": "./altVal/6.png",
+        "value": 10
+    },
+    "4": {
+        "front": "./altVal/5.png",
+        "back": "./altVal/7.png",
+        "value": 10
+    },
+    "5": {
+        "front": "./altVal/8.png",
+        "back": "./altVal/10.png",
+        "value": 10
+    },
+    "6": {
+        "front": "./altVal/9.png",
+        "back": "./altVal/11.png",
+        "value": 10
+    },
+    "7": {
+        "front": "./altVal/12.png",
+        "back": "./altVal/13.png",
+        "value": 20
+    },
+    "8": {
+        "front": "./altVal/14.png",
+        "back": "./altVal/15.png",
+        "value": 20
+    },
+    "9": {
+        "front": "./altVal/16.png",
+        "back": "./altVal/18.png",
+        "value": 50
+    },
+    "10": {
+        "front": "./altVal/17.png",
+        "back": "./altVal/19.png",
+        "value": 50
+    },
+    "11": {
+        "front": "./altVal/20.png",
+        "back": "./altVal/21.png",
+        "value": 100
+    },
+    "12": {
+        "front": "./altVal/22.png",
+        "back": "./altVal/23.png",
+        "value": 100
+    }
+}

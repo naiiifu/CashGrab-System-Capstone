@@ -63,7 +63,8 @@ def DetectInsertion():
 
     pulseDuration = __GetPulseDuration()
 
-    return pulseDuration <= THRESHOLD
+    #return pulseDuration <= THRESHOLD
+    return pulseDuration
     
     
 def detect_loop():
