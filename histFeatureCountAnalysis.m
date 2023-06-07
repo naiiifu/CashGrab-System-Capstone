@@ -1,6 +1,9 @@
 function [featureMean, featureStdv, zeroMean, zeroStdv] = histFeatureCountAnalysis(filePath)
     close all;
 
+    realValue = "RealValue";
+    detectedValue = "TestValue";
+    featureCount = "Error";
 
     table = readtable(filePath);
 
@@ -8,31 +11,31 @@ function [featureMean, featureStdv, zeroMean, zeroStdv] = histFeatureCountAnalys
     incorrectDataFeatureCount = [];
     zeroDataFeatureCount = [];
 
-    correctDataFeatureCountDiff = [];
-    incorrectDataFeatureCountDiff = [];
-    zeroDataFeatureCountDiff = [];
+    % correctDataFeatureCountDiff = [];
+    % incorrectDataFeatureCountDiff = [];
+    % zeroDataFeatureCountDiff = [];
 
-    correctFeatureRatio = [];
-    incorrectFeatureRatio = [];
-    zeroDataFeatureRatio = [];
+    % correctFeatureRatio = [];
+    % incorrectFeatureRatio = [];
+    % zeroDataFeatureRatio = [];
 
     dim = size(table);
 
     for ii = 1:dim(1)
        row = table(ii, :);
 
-       if row.("ActualValue") == 0
-            zeroDataFeatureCount = [zeroDataFeatureCount row.("Features")];
-            zeroDataFeatureCountDiff = [zeroDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
-            zeroDataFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
-       elseif row.("ActualValue") == row.("DetectedValue")
-            correctDataFeatureCount = [correctDataFeatureCount row.("Features")];
-            correctDataFeatureCountDiff = [correctDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
-            correctFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
+       if row.(realValue) == 0
+            zeroDataFeatureCount = [zeroDataFeatureCount row.(featureCount)];
+            % zeroDataFeatureCountDiff = [zeroDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
+            % zeroDataFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
+       elseif row.(realValue) == row.(detectedValue)
+            correctDataFeatureCount = [correctDataFeatureCount row.(featureCount)];
+            % correctDataFeatureCountDiff = [correctDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
+            % correctFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
        else
-            incorrectDataFeatureCount = [incorrectDataFeatureCount row.("Features")];
-            incorrectDataFeatureCountDiff = [incorrectDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
-            incorrectFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
+            incorrectDataFeatureCount = [incorrectDataFeatureCount row.(featureCount)];
+            % incorrectDataFeatureCountDiff = [incorrectDataFeatureCountDiff row.("Features") - row.("SecondMostFeatures")];
+            % incorrectFeatureRatio = [correctFeatureRatio row.("Features") / row.("ReferenceBillFeatures")];
        end
     end
 
