@@ -26,7 +26,7 @@ def __AddToFilter(newValue):
     averageFilter[len(averageFilter) - 1] = newValue
 
 def __GetRunningAverage():
-    return sum(averageFilter / len(averageFilter))
+    return sum(averageFilter) / len(averageFilter)
 
 def __GetPulseDuration():
     pulse_start_time = 0.0
