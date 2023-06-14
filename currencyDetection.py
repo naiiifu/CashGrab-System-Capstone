@@ -120,7 +120,7 @@ def MatchFeatures(inputFeatures, keyFeatures):
 
 def CreateAffineModel(matches, inuptKeypoints, keyKeypoints):
     if len(matches) < 7:
-        return None
+        return (None, None)
 
     srcPoints = np.float32([inuptKeypoints[m.queryIdx].pt for m in matches]).reshape(-1, 1, 2)
     destPoints = np.float32([keyKeypoints[m.trainIdx].pt for m in matches]).reshape(-1, 1, 2)
@@ -128,7 +128,7 @@ def CreateAffineModel(matches, inuptKeypoints, keyKeypoints):
     M, mask = cv.findHomography(srcPoints, destPoints, cv.RANSAC, ransacReprojThreshold = INLIER_THRESHOLD, maxIters = MAX_ITERATIONS, confidence=HYPOTHESIS_CONFIDENCE)
     
     if M is None:
-        return None
+        return (None, None)
 
     return (M, mask)
 
