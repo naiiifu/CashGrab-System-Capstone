@@ -66,7 +66,7 @@ def calculateBaseline(imgArr): #could pass key/other relevant info or handle out
     right_count = calculate_non_zero_count(right)
     return (left_count, mid_count, right_count)
 
-def checkCounterfeit(imgArr,baseline):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
+def checkCounterfeit_percent(imgArr,baseline):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
     test = (left,mid,right)= calculateBaseline(imgArr)
     # Compare the binary masks
     pane_match = False
@@ -75,7 +75,10 @@ def checkCounterfeit(imgArr,baseline):#baseline is list of tuples or smth?? or b
         percentage_similarity = (np.count_nonzero(difference == 0) / difference.size) * 100
         if (percentage_similarity >.2):
             pane_match = True
-            #could check make sure rest dont match with correct pane
+            #could check make sure rest dont match with correct pane\
+
+
+            
             break
 
     return pane_match
@@ -90,8 +93,8 @@ if __name__ =="__main__":
     originalR = cv2.imread(real_image)
     originalF = cv2.imread(fake_image)
     baseline = calculateBaseline(originalR)
-    print("resutl {}".format(checkCounterfeit(originalF,baseline[0])))
-
+    print("result {}".format(checkCounterfeit_percent(originalF,baseline[0])))
+    
     imgR = (left,mid,right) = imgSplitVert(originalR)
     imgF = (left,mid,right) = imgSplitVert(originalF)
     for pane in imgR:
