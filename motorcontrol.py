@@ -7,6 +7,8 @@ from gpiozero import Servo
 # init motor pins
 # servoPIN = 17
 # servo = Servo(servoPIN)
+SERVO_PIN = 17
+
 isForward = True
 
 
@@ -105,6 +107,33 @@ def reject():
         
 def cleanup():
     GPIO.cleanup()
+
+
+def motor_fwd():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(SERVO_PIN, GPIO.OUT)
+    motor = GPIO.PWM(SERVO_PIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.start(2.5)
+    motor.ChangeDutyCycle(10) #forward
+    time.sleep(0.25)  
+    #time.sleep(0.25)  0.25s is good
+
+
+def motor_bwd():
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(SERVO_PIN, GPIO.OUT)
+    motor = GPIO.PWM(SERVO_PIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.start(2.5)
+    motor.ChangeDutyCycle(5)#backward
+    time.sleep(4)  #need to find time
+    motor.stop()
+
+
+def stop_motor():
+    motor = GPIO.PWM(SERVO_PIN, 50) # GPIO 17 for PWM with 50Hz
+    motor.stop()
+    time.sleep(2)
+
 
 
 if __name__ == "__main__":
