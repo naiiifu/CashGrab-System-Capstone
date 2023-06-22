@@ -1,5 +1,6 @@
 import RPi.GPIO as GPIO
 import time
+import signal
 
 TRIG_PIN = 2
 ECHO_PIN = 13
@@ -66,6 +67,9 @@ def DetectInsertion():
     return pulseDuration <= THRESHOLD
     
     
+def timeout_handler(signum, frame):
+    raise TimeoutError("Timeout occurred")
+
 def detect_loop():
     while(True):
         if(DetectInsertion()):

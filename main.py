@@ -1,87 +1,93 @@
 import json
-import sys
-import currencyInsertionDetector as Detector
-import motorcontrol as motor
-import imageCaptureSaver as camera
-  
+import currencyInsertionDetector
+import motorcontrol
+import imageCaptureSaver
+import currencyDetection
+import socketio
+import threading
+import queue
 
-  # Define state constants
-WAIT_S = 0
-TRANSACTION_S = 1
-REJECT_S = 2
-CANCEL_S = 3
+WEB_APP = 0
 
+# Cancellation flag for child thread
+cancel_flag = threading.Event()
 
-def handle_reject_state():
-    pass
+def Transaction(json_data, com_queue):
 
+    data = json.loads(json_data)
+    cost = data['cost']
 
-def handle_cancel_state(data):
-#to cancel a transaction in progress
-    pass
-    
-    
+    while True:
 
-
-testing = False
-
-if len(sys.argv) > 1:
-    # Get the JSON data from the command-line argument
-    json_data = sys.argv[1]
-  
-else:
-    #for testing purposes
-    print("testing mode control.py")
-    json_data = "{\"state\":1, \"cost\":30}"
-    testing = True
-
-data = json.loads(json_data)
-current_state = data['state']
-cost = data['cost']
-
-print("setting up")
-sys.stdout.flush() # flush the output buffer
-#print(f"curret state {current_state}")
-(values, frontFeatures, backFeatures) = camera.setup() #DO: move this to client.py and pass values over command line
-
-print("ready")
-
-
-while True:
-    sys.stdout.flush() # flush the output buffer
-    if current_state == WAIT_S:
-        break
-    elif current_state == CANCEL_S:
-        handle_cancel_state(cost)
-        current_state = WAIT_S
+        while not cancel_flag.is_set():
+            if (currencyInsertionDetector.DetectInsertion()):
+                break
         
-    elif current_state == TRANSACTION_S:
-        result = Detector.detect_loop()#infinite loop until sensor detects something within threshold
-        if (result==False):
-            print(f'Fatal error waiting for sensor')
+        if cancel_flag.is_set():
             break
+
         #something has been detected move bill to camera POV
-        motor.moveToPhoto()
-        amount = camera.checkImg(values, frontFeatures, backFeatures)
+        motorcontrol.moveToPhoto()
+
+        image_arr = imageCaptureSaver.CaptureImage()
+        (amount, error) = currencyDetection.Detect(image_arr)
+
         if amount <= 0:
             # current_state = REJECT_S
             print("rejected")
-            motor.reject()
+            motorcontrol.reject()
 
         else:
             cost = cost - amount
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
-            motor.moveToStorage()
+            if WEB_APP:
+                sio.emit('result', {"inserted": amount})
+            motorcontrol.moveToStorage()
 
-        if cost<= 0:#TODO handle this in client.py
+        if cost<= 0: #TODO handle this in client.py
             print(f'Transaction Complete!')
             break
-            
-    elif current_state == REJECT_S:
-        continue
-        # handle_reject_state(current_state)
-        #send message to server?
-    else:
-        print(f'Invalid state value: {current_state}')
-        break
 
+
+
+if __name__ == "__main__":
+        
+    keyPath = "./piValidation.json"
+    print("setting up")
+    currencyDetection.SetUp(keyPath)
+    print("ready")
+    
+    if not WEB_APP:
+        json_data = "{\"cost\":30}"
+        com_queue = queue.Queue()
+        child_thread = threading.Thread(target=Transaction, args=(json_data, com_queue))
+        child_thread.start()
+
+    else:
+        # Initialize the Socket.io client
+        sio = socketio.Client()
+        sio.connect('http://207.23.176.230:8080')
+
+        # Define a callback function to handle the 'json' event
+        @sio.on('json')
+        def handle_json(json_data):
+
+            print(f'Received JSON data: {json_data}')
+
+            data = json.loads(json_data)
+            cost = data['cost']
+
+            if (cost > 0):
+                # Create a child thread
+                cancel_flag.clear()
+                com_queue = queue.Queue()
+                child_thread = threading.Thread(target=Transaction, args=(json_data, com_queue))
+
+                # Start the child thread
+                child_thread.start()
+
+            else:
+                # Cancel child_thread
+                cancel_flag.set()
+
+        sio.wait()

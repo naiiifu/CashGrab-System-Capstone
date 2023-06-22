@@ -9,8 +9,6 @@ def createJson(line):
     value = int(data)
     json_data = {"inserted": value}
     return json_data
- 
-
 
 
 # Initialize the Socket.io client
@@ -36,7 +34,7 @@ def handle_json(json_data):
 
 # Connect to the server
 
-#sio.emit('result', "hello");
+# sio.emit('result', "hello");
 # Wait for responses from the server
 print("waiting on port 3001")
 sio.wait()
