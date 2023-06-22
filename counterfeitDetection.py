@@ -168,10 +168,6 @@ def Demo():
     cv2.destroyAllWindows()
 
 if __name__ =="__main__":
-    Demo()
-    
-    while True:
-        i = 1
     #real_image = "./CFphoto/23.png"
     real_image = "./CFphoto/real5.png"
     fake_image = "./CFphoto/fake11.png"
