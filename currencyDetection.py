@@ -25,10 +25,35 @@ MAX_ITERATIONS = int(10000)
 
 sift = cv.SIFT_create()
 
+global keyImages
+global keyValues
+global keyKeypoints
+global keyDescriptors
+global keyColorHists
+global points
+
+keyImages = []
 keyValues = []
 keyKeypoints = []
 keyDescriptors = []
 keyColorHists = []
+points = []
+
+def getMatchIndex():
+    global latestMatchIndex
+    return latestMatchIndex
+
+def getAffineTransform():
+    global latestAffineTransform
+    return latestAffineTransform
+
+def getReferenceImage(referenceIndex):
+    global keyImages
+    return keyImages[referenceIndex]
+
+def getReferencePoints(referenceIndex):
+    global points
+    return points[referenceIndex]
 
 def SetUp(validationSetPath):
     jsonFile = open(validationSetPath)
@@ -37,21 +62,44 @@ def SetUp(validationSetPath):
     for key in jsonObj:
         # front image
         keyValues.append(jsonObj[key]['value'])
+
         frontImage = cv.imread(jsonObj[key]['front'])
         keyColorHists.append(GetHistogram(frontImage))
+
         frontImage = DownScale(frontImage, DOWNSCALE_RATIO)
+        keyImages.append(frontImage)
+
         (frontKp, frontDesc) = GetFeatures(frontImage)
+
         keyKeypoints.append(frontKp)
         keyDescriptors.append(frontDesc)
 
+        frontPoint = jsonObj[key]['points']['front']
+        for i in range(0, len(frontPoint)):
+            frontPoint[i] = (frontPoint[i][0] / DOWNSCALE_RATIO, frontPoint[i][1] / DOWNSCALE_RATIO)
+
+        points.append(frontPoint)
+
         # back image
         keyValues.append(jsonObj[key]['value'])
+
         backImage = cv.imread(jsonObj[key]['back'])
         keyColorHists.append(GetHistogram(backImage))
+
         backImage = DownScale(backImage, DOWNSCALE_RATIO)
+        keyImages.append(backImage)
+
         (backKp, backDesc) = GetFeatures(backImage)
+
         keyKeypoints.append(backKp)
         keyDescriptors.append(backDesc)
+
+        backPoint = jsonObj[key]['points']['back']
+        
+        for i in range(0, len(backPoint)):
+            backPoint[i] = (backPoint[i][0] / DOWNSCALE_RATIO, backPoint[i][1] / DOWNSCALE_RATIO)
+
+        points.append(backPoint)
 
 def GetHistogram(img):
     hist = cv.calcHist([img], [0, 1, 2], None, [8, 8, 8], [0, 256, 0, 256, 0, 256])
@@ -176,8 +224,13 @@ def Detect(image):
             inliers = np.sum(matchesMask)
             
             if inliers > bestMatchError:
+                global latestAffineTransform
+                global latestMatchIndex
+
                 bestMatchError = inliers
                 bestMatchValue = keyValues[matchIndex]
+                latestMatchIndex = matchIndex
+                latestAffineTransform = transform
     
     if USE_MSE_ERROR and bestMatchError < ERROR_THRESHOLD:
         return (bestMatchValue, bestMatchError)

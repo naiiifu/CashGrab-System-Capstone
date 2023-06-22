@@ -2,6 +2,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+import currencyDetection
 
 MASTER_FOLDER = "./validation.json"
 THRESHOLD_VALUE = 60
@@ -79,11 +80,95 @@ def checkCounterfeit(imgArr,baseline):#baseline is list of tuples or smth?? or b
             break
 
     return pane_match
-    
-    
 
+# expects to be given the points on the reference bill, and the affine transform returned by RANSAC
+# affine transform is from input image space to reference image space
+def inverseTransformPoints(referencePoints, affineTransform):
+    transformInput = np.float32(referencePoints).reshape(-1,1,2)
+
+    inverseAffineTransform = np.linalg.inv(affineTransform)
+
+    transformOutput = cv2.perspectiveTransform(transformInput, inverseAffineTransform)
+
+    return transformOutput
+
+def getPointBoundSubimage(points, image):
+    minX = float("inf")
+    maxX = -float("inf")
+    minY = float("inf")
+    maxY = -float("inf")
+
+    for i in range(0, len(points)):
+        point = points[i]
+        minX = min(minX, point[0])
+        maxX = max(maxX, point[0])
+        minY = min(minY, point[1])
+        maxY = max(maxY, point[1])
+
+    minX = int(minX)
+    maxX = int(maxX)
+    minY = int(minY)
+    maxY = int(maxY)
+
+    croppedImage = image[minY:maxY, minX:maxX]
+
+    return croppedImage
+
+def getReferenceTransparentWindow(referenceIndex):
+    referenceImage = currencyDetection.getReferenceImage(referenceIndex)
+    referencePoints = currencyDetection.getReferencePoints(referenceIndex)
+
+    croppedReferenceImage = getPointBoundSubimage(referencePoints, referenceImage)
+
+    return croppedReferenceImage
+
+def getInputTransparentWindow(inputImage, referenceIndex, affineTransform):
+    points = currencyDetection.getReferencePoints(referenceIndex)
+
+    transformedPoints = inverseTransformPoints(points, affineTransform)
+
+    transformedPoints = transformedPoints.tolist()
+
+    for i in range(0, len(transformedPoints)):
+        point = transformedPoints[i]
+        point = point[0]
+        transformedPoints[i] = point
+
+    return getPointBoundSubimage(transformedPoints, inputImage)
+
+def Demo():
+    inputImagePath = "val/trainingData/raspicamNoPlexi/13.png"
+    validationPath = "./piValidation.json"
+
+    currencyDetection.SetUp(validationPath)
+
+    inputImage = cv2.imread(inputImagePath)
+    (value, error) = currencyDetection.Detect(inputImage)
+
+    if value == 0:
+        print("Bill not detected!")
+        return
+    
+    affineTransform = currencyDetection.getAffineTransform()
+    referenceIndex = currencyDetection.getMatchIndex()
+
+    # needs to be downscaled since we only store the downscaled version of the reference image
+    downscaledImage = currencyDetection.DownScale(inputImage, currencyDetection.DOWNSCALE_RATIO)
+
+    referenceWindow = getReferenceTransparentWindow(referenceIndex)
+    inputWindow = getInputTransparentWindow(downscaledImage, referenceIndex, affineTransform)
+
+    cv2.imshow("reference", referenceWindow)
+    cv2.imshow("input", inputWindow)
+
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
 
 if __name__ =="__main__":
+    Demo()
+    
+    while True:
+        i = 1
     #real_image = "./CFphoto/23.png"
     real_image = "./CFphoto/real5.png"
     fake_image = "./CFphoto/fake11.png"
