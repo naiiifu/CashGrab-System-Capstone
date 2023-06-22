@@ -19,6 +19,8 @@ def Transaction(json_data, com_queue):
 
     while True:
 
+
+
         while not cancel_flag.is_set():
             if (currencyInsertionDetector.DetectInsertion()):
                 break
