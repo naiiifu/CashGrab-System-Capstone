@@ -11,6 +11,8 @@ imageCount = 69
 WARM_UP_TIME = 0.25
 
 camera = Picamera2()
+camera_config = camera.create_still_configuration(main={"size": (1920, 1080)}, lores={"size": (1920, 1080)}, display="lores")
+camera.configure(camera_config)
 #camera.resolution = (1920,1080)
 #full_res=camera.sensor_resolution
 #half_res=tuple([dim // 2 for dim in camera.sensor_resolution])

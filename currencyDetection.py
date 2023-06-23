@@ -164,10 +164,10 @@ def Detect(image):
 
         affineModel = CreateAffineModel(matches, keypoints, keyKeypoints[matchIndex])
 
-        if affineModel is None:
-            continue
-
         (transform, mask) = affineModel
+
+        if transform is None or mask is None:
+            continue
 
         if USE_MSE_ERROR:
             error = GetMSE(transform, mask, keypoints, keyKeypoints[matchIndex])

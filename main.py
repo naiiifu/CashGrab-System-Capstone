@@ -23,9 +23,10 @@ def Transaction(json_data, com_queue):
 
         secondsSinceLastStop = 100
         timeMotorResumed = 0
+
         # distance between sensor and the bill on the conveyor belt is 4.8cm
         MIN_DISTANCE_IN_M = 0.05
-
+        # motorcontrol.motor_bwd()
         while not cancel_flag.is_set(): 
             print("distance: ")
             print(currencyInsertionDetector.get_distance())
@@ -36,13 +37,16 @@ def Transaction(json_data, com_queue):
             print("secondsSinceLastStop:")
             print(secondsSinceLastStop)
 
-            if currencyInsertionDetector.get_distance() < MIN_DISTANCE_IN_M and secondsSinceLastStop > 3:
+            if currencyInsertionDetector.get_distance() < MIN_DISTANCE_IN_M:
+                for i in range(2):
+                    motorcontrol.motor_fwd()
                 print("detected")
                 detectTime = datetime.now().timestamp()
                 time.sleep(2)
                 motorcontrol.stop_motor() 
                 timeMotorResumed = datetime.now().timestamp()
                 break
+        
             else:
                 motorcontrol.motor_fwd()
         
@@ -53,7 +57,6 @@ def Transaction(json_data, com_queue):
         (amount, error) = currencyDetection.Detect(image_arr)
 
         if amount <= 0:
-            # current_state = REJECT_S
             print("rejected")
             motorcontrol.motor_bwd()
 
@@ -62,7 +65,8 @@ def Transaction(json_data, com_queue):
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})
-            motorcontrol.motor_fwd()
+            for i in range(8):
+                motorcontrol.motor_fwd()
 
         if cost<= 0: #TODO handle this in client.py
             print(f'Transaction Complete!')
