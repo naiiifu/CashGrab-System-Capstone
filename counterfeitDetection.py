@@ -1,24 +1,13 @@
-import cv2
-import matplotlib.pyplot as plt
+import cv2 
 import numpy as np
 
 import currencyDetection
 
 MASTER_FOLDER = "./validation.json"
-THRESHOLD_VALUE = 60
+validationPath = "./piValidation.json"
 
-sample_images = [ #5,10,20,50,100 left/right
-    
-    "raspicamNoPlexi/10.png",
-    "raspicamNoPlexi/11.png",
-    "raspicamNoPlexi/22.png",
-    "raspicamNoPlexi/23.png",
-    "raspicamNoPlexi/30.png",
-    "raspicamNoPlexi/32.png",
-    "raspicamNoPlexi/38.png",
-    "raspicamNoPlexi/58.png",
-    "raspicamNoPlexi/59.png",
-]
+THRESHOLD_VALUE = 60
+PERCENT_TOLERANCE = 0.7
 
 def imgSplitHrz(img):
     h, w, channels = img.shape
@@ -59,7 +48,7 @@ def calculate_non_zero_count(imgArr, threshold_value=THRESHOLD_VALUE):
 
     return count
 
-def calculateBaseline(imgArr): #could pass key/other relevant info or handle outside
+def calculatePaneBaselines(imgArr): #could pass key/other relevant info or handle outside
     #assume greyscale?
     img = (left,mid,right) = imgSplitVert(imgArr)
     left_count = calculate_non_zero_count(left)
@@ -67,8 +56,8 @@ def calculateBaseline(imgArr): #could pass key/other relevant info or handle out
     right_count = calculate_non_zero_count(right)
     return (left_count, mid_count, right_count)
 
-def checkCounterfeit_percent(imgArr,baseline):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
-    test = (left,mid,right)= calculateBaseline(imgArr)
+def DEPRECATEDcheckCounterfeit_percent(imgArr,baseline):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
+    test = (left,mid,right)= calculatePaneBaselines(imgArr)
     # Compare the binary masks
     pane_match = False
     for pane in test: 
@@ -77,12 +66,19 @@ def checkCounterfeit_percent(imgArr,baseline):#baseline is list of tuples or smt
         if (percentage_similarity >.2):
             pane_match = True
             #could check make sure rest dont match with correct pane\
-
-
             
             break
 
     return pane_match
+
+def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
+    difference = cv2.subtract(input, reference)
+    percentage_similarity = (np.count_nonzero(difference == 0) / difference.size) * 100
+    if (percentage_similarity > PERCENT_TOLERANCE):
+        return True
+    else:
+        print("Rejected with similairty {percentage_similarity}")
+    return False
 
 # expects to be given the points on the reference bill, and the affine transform returned by RANSAC
 # affine transform is from input image space to reference image space
@@ -139,8 +135,44 @@ def getInputTransparentWindow(inputImage, referenceIndex, affineTransform):
 
     return getPointBoundSubimage(transformedPoints, inputImage)
 
+def detectCF(imgArr):
+    cv2.imshow(":(",imgArr)
+    cv2.waitKey(0)
+    #currencyDetection.SetUp(validationPath)
+
+    #inputImage = cv2.imread(inputImagePath)
+    inputImage = imgArr
+    (value, error) = currencyDetection.Detect(inputImage)
+
+    if value == 0:
+        print("Bill not detected!")
+        return False
+    
+    affineTransform = currencyDetection.getAffineTransform()
+    referenceIndex = currencyDetection.getMatchIndex()
+
+    # needs to be downscaled since we only store the downscaled version of the reference image
+    downscaledImage = currencyDetection.DownScale(inputImage, currencyDetection.DOWNSCALE_RATIO)
+
+    referenceWindow = getReferenceTransparentWindow(referenceIndex)
+    inputWindow = getInputTransparentWindow(downscaledImage, referenceIndex, affineTransform)
+    inputWindowGRAY = cv2.cvtColor(inputWindow, cv2.COLOR_BGR2GRAY)
+    referenceWindowGRAY = cv2.cvtColor(referenceWindow, cv2.COLOR_BGR2GRAY)
+    countBaseline = calculate_non_zero_count(referenceWindowGRAY)
+    countInput = calculate_non_zero_count(inputWindowGRAY)
+    return checkCounterfeit_percent(countInput,countBaseline)
+
+    cv2.imshow("reference", referenceWindow)
+    cv2.imshow("input", inputWindow)
+    calculateBaseline(referenceWindow)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
+    #return checkCounterfeit_percent(countInput,countBaseline)
+
+
+
 def Demo():
-    inputImagePath = "val/trainingData/raspicamNoPlexi/13.png"
+    inputImagePath = "./val/trainingData/raspicamNoPlexi/13.png"
     validationPath = "./piValidation.json"
 
     currencyDetection.SetUp(validationPath)
@@ -168,22 +200,15 @@ def Demo():
     cv2.destroyAllWindows()
 
 if __name__ =="__main__":
-    #real_image = "./CFphoto/23.png"
-    real_image = "./CFphoto/real5.png"
-    fake_image = "./CFphoto/fake11.png"
+    #Demo()
+    currencyDetection.SetUp(validationPath)
+    #real_image = "./val/CFphoto/23.png"
+    real_image = "./val/trainingData/raspicamNoPlexi/13.png"
+    fake_image = "./val/CFphoto/fake11.png"
+
     originalR = cv2.imread(real_image)
     originalF = cv2.imread(fake_image)
-    baseline = calculateBaseline(originalR)
-    print("result {}".format(checkCounterfeit_percent(originalF,baseline[0])))
-    
-    imgR = (left,mid,right) = imgSplitVert(originalR)
-    imgF = (left,mid,right) = imgSplitVert(originalF)
-    for pane in imgR:
-        grey = cv2.cvtColor(pane, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("gg",grey)
-        displayThreshold(grey)
-    for pane in imgF:
-        grey = cv2.cvtColor(pane, cv2.COLOR_BGR2GRAY)
-        cv2.imshow("gg",grey)
-        displayThreshold(grey)
+    assert detectCF(originalR)
+    assert not detectCF(originalF)
+ 
 
