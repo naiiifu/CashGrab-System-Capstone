@@ -1,4 +1,5 @@
 import I2C_LCD_driver
 from time import *
 mylcd = I2C_LCD_driver.lcd()
-mylcd.lcd_display_string("Hello World!", 1)
+mylcd.lcd_display_string("Total amount: ", 1)
+mylcd.lcd_display_string("$123.45", 2)
