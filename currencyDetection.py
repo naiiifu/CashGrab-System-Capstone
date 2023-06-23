@@ -242,7 +242,8 @@ def Detect(image):
 
 if __name__ == "__main__":
     keyPath = "./piValidation.json"
-    trainingPath = "./raspiCamTrainingSet.json"
+    # trainingPath = "./raspiCamTrainingSet.json"
+    trainingPath = "./finalValCombined.json"
 
     pr.enable()
 

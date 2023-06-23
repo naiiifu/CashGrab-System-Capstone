@@ -7,10 +7,14 @@ import numpy as np
 from picamera2 import Picamera2  
 import time
 
-imageCount = 69
+global imageCount
+imageCount = 1
+path = "./val/finalVal/real"
 WARM_UP_TIME = 0.25
 
 camera = Picamera2()
+camera_config = camera.create_still_configuration(main={"size": (1920, 1080)}, lores={"size": (1920, 1080)}, display="lores")
+camera.configure(camera_config)
 #camera.resolution = (1920,1080)
 #full_res=camera.sensor_resolution
 #half_res=tuple([dim // 2 for dim in camera.sensor_resolution])
@@ -22,48 +26,19 @@ camera = Picamera2()
 camera.start()
 
 def CaptureImage():
-	
-	
 	time.sleep(WARM_UP_TIME)
 	array = camera.capture_array("main")
 	array = np.array(array, dtype=np.uint8)
 	array = cv.cvtColor(array, cv.COLOR_BGR2RGB)
 	
-	
 	return array
-	
-	
-	# output = np.empty(camera.resolution, dtype=np.uint8)
-	# camera.capture(output, "rgb")
-	
-	# return output
-	
-	
-	# frame = np.empty((camera.resolution[0], camera.resolution[1], 3), dtype=np.uint8)
-	# print(len(frame))
-	# camera.capture(frame, "bgr")
-	
-	# return rawCapture
-
-def DeglareImage(image):
-	print("2")
-	grey = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
-	mask = cv.threshold(grey, 220, 255, cv.THRESH_BINARY)[1]
-	mask = cv.blur(mask, (3,3))
-	cv.imshow("mask", mask) 
-	print("3")
-	
-	result = cv.inpaint(image, mask, 21, cv.INPAINT_TELEA)
-	print("4")
-	return result
     
-if __name__ == '__main__':
-	endLoop = False
+
+def singlePhoto():
+	global imageCount
+	endLoop = False 
 	while not endLoop:
 		frame = CaptureImage()
-		#print("1")
-		# deglared = DeglareImage(frame)
-		#print("5")
 		cv.imshow("Frame", frame)
 		
 		key = cv.waitKey(0)
@@ -71,7 +46,24 @@ if __name__ == '__main__':
 		print(key)
 		
 		if key == 99: #lowecase c
-			cv.imwrite('dfake{}.png'.format(imageCount), frame)
+			cv.imwrite(os.path.join(path,'real{}.png'.format(imageCount)), frame)
+			imageCount = imageCount + 1
+		elif key == 27: #esc
+			endLoop = True
+		cv.destroyAllWindows()
+
+if __name__ == '__main__':
+	endLoop = False
+	while not endLoop:
+		frame = CaptureImage()
+		cv.imshow("Frame", frame)
+		
+		key = cv.waitKey(0)
+		
+		print(key)
+		
+		if key == 99: #lowecase c
+			cv.imwrite('real{}.png'.format(imageCount), frame)
 			imageCount = imageCount + 1
 		elif key == 27: #esc
 			endLoop = True
