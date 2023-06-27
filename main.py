@@ -9,7 +9,9 @@ import queue
 import time
 from datetime import datetime
 
-WEB_APP = 0
+WEB_APP = 1
+CREATE_VALIDATION_SET = False
+
 
 # Cancellation flag for child thread
 cancel_flag = threading.Event()
@@ -28,14 +30,14 @@ def Transaction(json_data, com_queue):
         MIN_DISTANCE_IN_M = 0.05
         # motorcontrol.motor_bwd()
         while not cancel_flag.is_set(): 
-            print("distance: ")
-            print(currencyInsertionDetector.get_distance())
-            print("timeMotorResumed:")
-            print(timeMotorResumed)
+            # print("distance: ")
+            # print(currencyInsertionDetector.get_distance())
+            # print("timeMotorResumed:")
+            # print(timeMotorResumed)
         
             secondsSinceLastStop = datetime.now().timestamp() - timeMotorResumed
-            print("secondsSinceLastStop:")
-            print(secondsSinceLastStop)
+            # print("secondsSinceLastStop:")
+            # print(secondsSinceLastStop)
 
             if currencyInsertionDetector.get_distance() < MIN_DISTANCE_IN_M:
                 for i in range(2):
@@ -51,9 +53,13 @@ def Transaction(json_data, com_queue):
                 motorcontrol.motor_fwd()
         
         if cancel_flag.is_set():
+            motorcontrol.cleanup()
+            cancel_flag.clear()
             break
-
+        if(CREATE_VALIDATION_SET):
+            imageCaptureSaver.singlePhoto()
         image_arr = imageCaptureSaver.CaptureImage()
+
         (amount, error) = currencyDetection.Detect(image_arr)
 
         if amount <= 0:
@@ -82,7 +88,7 @@ if __name__ == "__main__":
     print("ready")
     
     if not WEB_APP:
-        json_data = "{\"cost\":30}"
+        json_data = "{\"cost\":1000}"
         com_queue = queue.Queue()
         child_thread = threading.Thread(target=Transaction, args=(json_data, com_queue))
         child_thread.start()
@@ -90,7 +96,7 @@ if __name__ == "__main__":
     else:
         # Initialize the Socket.io client
         sio = socketio.Client()
-        sio.connect('http://207.23.176.230:8080')
+        sio.connect('http://localhost:8080')
 
         # Define a callback function to handle the 'json' event
         @sio.on('json')
@@ -113,5 +119,10 @@ if __name__ == "__main__":
             else:
                 # Cancel child_thread
                 cancel_flag.set()
+
+        @sio.on('cancel')
+        def handle_cancel(msg):
+           print(msg)
+           cancel_flag.set()
 
         sio.wait()

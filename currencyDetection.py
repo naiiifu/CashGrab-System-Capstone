@@ -6,6 +6,7 @@ import csv
 
 import cProfile
 import pstats, io
+import counterfeitDetection
 from pstats import SortKey
 pr = cProfile.Profile()
 
