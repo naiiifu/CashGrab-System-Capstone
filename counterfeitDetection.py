@@ -138,6 +138,7 @@ def getInputTransparentWindow(inputImage, referenceIndex, affineTransform):
 def detectCF(imgArr):
     cv2.imshow(":(",imgArr)
     cv2.waitKey(0)
+    cv2.destroyAllWindows()
     #currencyDetection.SetUp(validationPath)
 
     #inputImage = cv2.imread(inputImagePath)
@@ -160,13 +161,13 @@ def detectCF(imgArr):
     referenceWindowGRAY = cv2.cvtColor(referenceWindow, cv2.COLOR_BGR2GRAY)
     countBaseline = calculate_non_zero_count(referenceWindowGRAY)
     countInput = calculate_non_zero_count(inputWindowGRAY)
-    return checkCounterfeit_percent(countInput,countBaseline)
+    
 
     cv2.imshow("reference", referenceWindow)
     cv2.imshow("input", inputWindow)
-    calculateBaseline(referenceWindow)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
+    return checkCounterfeit_percent(countInput,countBaseline)
     #return checkCounterfeit_percent(countInput,countBaseline)
 
 
