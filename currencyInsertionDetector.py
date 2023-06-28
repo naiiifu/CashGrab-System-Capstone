@@ -5,7 +5,7 @@ import time
 from datetime import datetime
 
 
-TRIG_PIN = 2
+TRIG_PIN = 6
 ECHO_PIN = 13
 SERVO_PIN = 17
 
