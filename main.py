@@ -3,7 +3,7 @@ import currencyInsertionDetector
 import motorcontrol
 import imageCaptureSaver
 import currencyDetection
-import lcd_control
+import lcd_control 
 import socketio
 import threading
 import queue
