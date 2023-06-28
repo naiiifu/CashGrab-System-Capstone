@@ -13,10 +13,10 @@ def showAllImg(path):
             continue
         imgs.append(Image.open(os.path.join(path,f)))
     for img in imgs:
-        cv2.namedWindow("bruh", cv2.WINDOW_NORMAL)        # Create window with freedom of dimensions
-        cv2.resizeWindow("bruh", 800, 600) 
+        cv2.namedWindow(img, cv2.WINDOW_NORMAL)        # Create window with freedom of dimensions
+        cv2.resizeWindow(img, 800, 600) 
         opencvImage = cv2.cvtColor(numpy.array(img), cv2.COLOR_RGB2BGR)
-        cv2.imshow("bruh",opencvImage)
+        cv2.imshow(img,opencvImage)
         cv2.waitKey(0)
         cv2.destroyAllWindows()
     
@@ -27,4 +27,4 @@ def showAllImg(path):
 #         cv2.waitKey(600)
 
 if __name__ == "__main__":
-    showAllImg("./val/finalVal/real")
+    showAllImg("./val/finalVal/real/")
