@@ -17,7 +17,6 @@ CREATE_VALIDATION_SET = False
 cancel_flag = threading.Event()
 
 def Transaction(json_data, com_queue):
-
     data = json.loads(json_data)
     cost = data['cost']
 
@@ -40,11 +39,11 @@ def Transaction(json_data, com_queue):
             # print(secondsSinceLastStop)
 
             if currencyInsertionDetector.get_distance() < MIN_DISTANCE_IN_M:
-                for i in range(2):
-                    motorcontrol.motor_fwd()
+                # for i in range(2):
+                #   motorcontrol.motor_fwd()
                 print("detected")
                 detectTime = datetime.now().timestamp()
-                time.sleep(2)
+                time.sleep(0.5)
                 motorcontrol.stop_motor() 
                 timeMotorResumed = datetime.now().timestamp()
                 break
@@ -76,12 +75,11 @@ def Transaction(json_data, com_queue):
 
         if cost<= 0: #TODO handle this in client.py
             print(f'Transaction Complete!')
+            motorcontrol.stop_motor()
             break
 
 
-
 if __name__ == "__main__":
-        
     keyPath = "./piValidation.json"
     print("setting up")
     currencyDetection.SetUp(keyPath)
