@@ -5,8 +5,8 @@ import time
 TRIG_PIN = 2
 ECHO_PIN = 13
 
-TRIG_PIN2 = 3  # Example value for the new sensor's trigger pin
-ECHO_PIN2 = 14  # Example value for the new sensor's echo pin
+TRIG_PIN2 = 3
+ECHO_PIN2 = 14  
 
 ultrasonic = DistanceSensor(echo=ECHO_PIN, trigger=TRIG_PIN)
 ultrasonic2 = DistanceSensor(echo=ECHO_PIN2, trigger=TRIG_PIN2)
