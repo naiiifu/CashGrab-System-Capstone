@@ -1,13 +1,25 @@
 import cv2 
 import numpy as np
-
+import json
 import currencyDetection
 
-MASTER_FOLDER = "./validation.json"
+#copied form currencyDetection.py may need to remove later
+import csv
+import cProfile
+import pstats, io
+from pstats import SortKey
+pr = cProfile.Profile()
+
+#######
+
+MASTER_FOLDER = "./finalVal.json"
 validationPath = "./piValidation.json"
+
+DEBUG_MODE = False
 
 THRESHOLD_VALUE = 60
 PERCENT_TOLERANCE = 0.7
+PERCENT_RANGE = 0.2
 
 def imgSplitHrz(img):
     h, w, channels = img.shape
@@ -71,14 +83,27 @@ def DEPRECATEDcheckCounterfeit_percent(imgArr,baseline):#baseline is list of tup
 
     return pane_match
 
+
 def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
-    difference = cv2.subtract(input, reference)
-    percentage_similarity = (np.count_nonzero(difference == 0) / difference.size) * 100
-    if (percentage_similarity > PERCENT_TOLERANCE):
-        return True
+    upperlimit = reference*(1+PERCENT_RANGE)
+    lowerlimit = reference*(1-PERCENT_RANGE)
+    percentdiff = 100*abs(input-reference)/((input+reference)/2)
+    if(input <= upperlimit and input >= lowerlimit):
+        return False, percentdiff
     else:
-        print("Rejected with similairty {percentage_similarity}")
-    return False
+        if DEBUG_MODE:
+            print("Rejected with similairty {percentdiff}")
+    return True , percentdiff
+
+# def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
+#     difference = cv2.subtract(input, reference)
+#     percentage_similarity = (np.count_nonzero(difference == 0) / difference.size) * 100
+#     if (percentage_similarity > PERCENT_TOLERANCE):
+#         return True , percentage_similarity
+#     else:
+#         if DEBUG_MODE:
+#             print("Rejected with similairty {percentage_similarity}")
+#     return False , percentage_similarity
 
 # expects to be given the points on the reference bill, and the affine transform returned by RANSAC
 # affine transform is from input image space to reference image space
@@ -136,18 +161,23 @@ def getInputTransparentWindow(inputImage, referenceIndex, affineTransform):
     return getPointBoundSubimage(transformedPoints, inputImage)
 
 def detectCF(imgArr):
-    cv2.imshow(":(",imgArr)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    #currencyDetection.SetUp(validationPath)
+    if DEBUG_MODE:
+        cv2.namedWindow("input", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("input", 800, 600)
+        cv2.imshow("input",imgArr)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    #currencyDetection.SetUp(validationPath) enable if this isnt run being after currency detection fro some reason
 
     #inputImage = cv2.imread(inputImagePath)
     inputImage = imgArr
     (value, error) = currencyDetection.Detect(inputImage)
 
     if value == 0:
+        #if DEBUG_MODE:
         print("Bill not detected!")
-        return False
+        return True, -1
     
     affineTransform = currencyDetection.getAffineTransform()
     referenceIndex = currencyDetection.getMatchIndex()
@@ -162,54 +192,46 @@ def detectCF(imgArr):
     countBaseline = calculate_non_zero_count(referenceWindowGRAY)
     countInput = calculate_non_zero_count(inputWindowGRAY)
     
-
-    cv2.imshow("reference", referenceWindow)
-    cv2.imshow("input", inputWindow)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
-    return checkCounterfeit_percent(countInput,countBaseline)
     #return checkCounterfeit_percent(countInput,countBaseline)
-
-
-
-def Demo():
-    inputImagePath = "./val/trainingData/raspicamNoPlexi/13.png"
-    validationPath = "./piValidation.json"
-
-    currencyDetection.SetUp(validationPath)
-
-    inputImage = cv2.imread(inputImagePath)
-    (value, error) = currencyDetection.Detect(inputImage)
-
-    if value == 0:
-        print("Bill not detected!")
-        return
-    
-    affineTransform = currencyDetection.getAffineTransform()
-    referenceIndex = currencyDetection.getMatchIndex()
-
-    # needs to be downscaled since we only store the downscaled version of the reference image
-    downscaledImage = currencyDetection.DownScale(inputImage, currencyDetection.DOWNSCALE_RATIO)
-
-    referenceWindow = getReferenceTransparentWindow(referenceIndex)
-    inputWindow = getInputTransparentWindow(downscaledImage, referenceIndex, affineTransform)
-
-    cv2.imshow("reference", referenceWindow)
-    cv2.imshow("input", inputWindow)
-
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if DEBUG_MODE:
+        cv2.imshow("reference", referenceWindow)
+        cv2.imshow("input", inputWindow)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    (result, percent) = checkCounterfeit_percent(countInput,countBaseline)
+    return result, percent
 
 if __name__ =="__main__":
-    #Demo()
     currencyDetection.SetUp(validationPath)
-    #real_image = "./val/CFphoto/23.png"
-    real_image = "./val/trainingData/raspicamNoPlexi/13.png"
-    fake_image = "./val/CFphoto/fake11.png"
 
-    originalR = cv2.imread(real_image)
-    originalF = cv2.imread(fake_image)
-    assert detectCF(originalR)
-    assert not detectCF(originalF)
- 
+    keyPath = "./piValidation.json"
+    # trainingPath = "./raspiCamTrainingSet.json"
+    trainingPath = "./finalValCombined.json"
+
+    pr.enable()
+
+    currencyDetection.SetUp(keyPath)
+
+    with open("full_CF2.csv", 'w') as file:
+        writer = csv.writer(file, lineterminator="\n")
+        writer.writerow(["RealValue", "TestValue", "Error","Fake","Percent","Guess"])
+
+        trainingFile = open(trainingPath)
+        trainingJson = json.load(trainingFile)
+
+        for entry in trainingJson:
+            image = cv2.imread(entry['path'])
+            inputValue = entry['value']
+
+            (value, error) = currencyDetection.Detect(image)
+            (result, percent) = detectCF(image)
+
+            writer.writerow([inputValue, value, error,entry['fake'],percent,result])
+    
+    pr.disable()
+    s = io.StringIO()
+    sortby = SortKey.CUMULATIVE
+    ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    ps.print_stats()
+    print(s.getvalue())
 

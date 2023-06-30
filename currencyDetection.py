@@ -1,12 +1,13 @@
 import cv2 as cv
 import numpy as np
 import json
+import counterfeitDetection
 
 import csv
-
 import cProfile
 import pstats, io
 from pstats import SortKey
+
 pr = cProfile.Profile()
 
 USE_MSE_ERROR = False
@@ -15,7 +16,7 @@ FEATURE_THRESHOLD = 35
 
 DOWNSCALE_RATIO = 2
 
-USE_COLOR_HIST_FILTERING = True
+USE_COLOR_HIST_FILTERING = False
 COLOR_HIST_CONSIDERATION = 5
 
 # RANSAC params
