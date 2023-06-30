@@ -16,7 +16,7 @@ def createJson(line):
 
 # Initialize the Socket.io client
 sio = socketio.Client()
-sio.connect('http://207.23.166.214:8080')
+sio.connect('http://142.58.165.151:8080')
 
 # Define a callback function to handle the 'json' event
 @sio.on('json')
@@ -47,5 +47,6 @@ frame = cv2.imencode('.jpg', myImg)[1]
 data = base64.b64encode(frame)
 print('data')
 sio.emit('image', data)
+sio.emit('result',{"inserted": 10})
 print("waiting on port 3001")
 sio.wait()
