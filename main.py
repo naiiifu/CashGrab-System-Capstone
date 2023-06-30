@@ -9,7 +9,7 @@ import queue
 import time
 from datetime import datetime
 
-WEB_APP = 1
+WEB_APP = 0
 CREATE_VALIDATION_SET = False
 
 
@@ -38,9 +38,9 @@ def Transaction(json_data, com_queue):
             # print("secondsSinceLastStop:")
             # print(secondsSinceLastStop)
 
-            if currencyInsertionDetector.get_distance() < MIN_DISTANCE_IN_M:
-                # for i in range(2):
-                #   motorcontrol.motor_fwd()
+            if currencyInsertionDetector.get_distance1() < MIN_DISTANCE_IN_M and currencyInsertionDetector.get_distance2() < MIN_DISTANCE_IN_M:
+                for i in range(10):
+                  motorcontrol.motor_fwd()
                 print("detected")
                 detectTime = datetime.now().timestamp()
                 time.sleep(0.5)
@@ -63,14 +63,15 @@ def Transaction(json_data, com_queue):
 
         if amount <= 0:
             print("rejected")
-            motorcontrol.motor_bwd()
+            for i in range(75):
+              motorcontrol.motor_bwd()
 
         else:
             cost = cost - amount
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})
-            for i in range(8):
+            for i in range(40):
                 motorcontrol.motor_fwd()
 
         if cost<= 0: #TODO handle this in client.py
