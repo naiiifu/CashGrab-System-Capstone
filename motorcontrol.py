@@ -11,15 +11,15 @@ servo.start(0)  # Start PWM with duty cycle of 0
 
 def motor_fwd():
     servo.ChangeDutyCycle(10)  # Forward position (10% duty cycle)
-    time.sleep(0.01)
+    time.sleep(0.0125)
 
 def motor_bwd():
     servo.ChangeDutyCycle(5)  # Backward position (5% duty cycle)
-    time.sleep(0.01)
+    time.sleep(0.0125)
 
 def stop_motor():
     servo.ChangeDutyCycle(0)  # Stop position (0% duty cycle)
-    time.sleep(0.01)
+    time.sleep(0.0125)
 
 
 
