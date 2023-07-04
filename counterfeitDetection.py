@@ -15,11 +15,11 @@ pr = cProfile.Profile()
 MASTER_FOLDER = "./finalVal.json"
 validationPath = "./piValidation.json"
 
-DEBUG_MODE = False
+DEBUG_MODE = True
 
 THRESHOLD_VALUE = 60
 PERCENT_TOLERANCE = 0.7
-PERCENT_RANGE = 0.2
+PERCENT_RANGE = 0.3
 
 def imgSplitHrz(img):
     h, w, channels = img.shape
@@ -92,7 +92,7 @@ def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smt
         return False, percentdiff
     else:
         if DEBUG_MODE:
-            print("Rejected with similairty {percentdiff}")
+            print("Rejected with similairty {}".format(percentdiff))
     return True , percentdiff
 
 # def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
@@ -160,7 +160,7 @@ def getInputTransparentWindow(inputImage, referenceIndex, affineTransform):
 
     return getPointBoundSubimage(transformedPoints, inputImage)
 
-def detectCF(imgArr):
+def uncalculated_detectCF(imgArr):
     if DEBUG_MODE:
         cv2.namedWindow("input", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("input", 800, 600)
@@ -201,10 +201,50 @@ def detectCF(imgArr):
     (result, percent) = checkCounterfeit_percent(countInput,countBaseline)
     return result, percent
 
-if __name__ =="__main__":
-    currencyDetection.SetUp(validationPath)
 
+
+def detectCF(inputImage,value):
+    if DEBUG_MODE:
+        cv2.namedWindow("input", cv2.WINDOW_NORMAL)
+        cv2.resizeWindow("input", 800, 600)
+        cv2.imshow("input",inputImage)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    
+    #currencyDetection.SetUp(validationPath) enable if this isnt run being after currency detection fro some reason
+    #inputImage = cv2.imread(inputImagePath)
+    if value < 5:
+        #if DEBUG_MODE:
+        #print("Bill not detected!")
+        return True, -1
+    
+    affineTransform = currencyDetection.getAffineTransform()
+    referenceIndex = currencyDetection.getMatchIndex()
+
+    # needs to be downscaled since we only store the downscaled version of the reference image
+    downscaledImage = currencyDetection.DownScale(inputImage, currencyDetection.DOWNSCALE_RATIO)
+
+    referenceWindow = getReferenceTransparentWindow(referenceIndex)
+    inputWindow = getInputTransparentWindow(downscaledImage, referenceIndex, affineTransform)
+    inputWindowGRAY = cv2.cvtColor(inputWindow, cv2.COLOR_BGR2GRAY)
+    referenceWindowGRAY = cv2.cvtColor(referenceWindow, cv2.COLOR_BGR2GRAY)
+    countBaseline = calculate_non_zero_count(referenceWindowGRAY)
+    countInput = calculate_non_zero_count(inputWindowGRAY)
+    
+    #return checkCounterfeit_percent(countInput,countBaseline)
+    if DEBUG_MODE:
+        cv2.imshow("reference", referenceWindow)
+        cv2.imshow("input", inputWindow)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
+    (result, percent) = checkCounterfeit_percent(countInput,countBaseline)
+    return result, percent
+
+if __name__ =="__main__":
     keyPath = "./piValidation.json"
+    currencyDetection.SetUp(keyPath)
+
+
     # trainingPath = "./raspiCamTrainingSet.json"
     trainingPath = "./finalValCombined.json"
 
@@ -224,7 +264,7 @@ if __name__ =="__main__":
             inputValue = entry['value']
 
             (value, error) = currencyDetection.Detect(image)
-            (result, percent) = detectCF(image)
+            (result, percent) = uncalculated_detectCF(image)
 
             writer.writerow([inputValue, value, error,entry['fake'],percent,result])
     

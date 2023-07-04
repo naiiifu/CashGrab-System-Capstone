@@ -2,6 +2,7 @@ import json
 import currencyInsertionDetector
 import motorcontrol
 import imageCaptureSaver
+import counterfeitDetection
 import currencyDetection
 import lcd_control 
 import socketio
@@ -95,8 +96,8 @@ def Transaction(json_data, com_queue):
 
         image_arr = imageCaptureSaver.CaptureImage()
         (amount, error) = currencyDetection.Detect(image_arr)
-
-        if amount <= 0:
+        (result, percent) = counterfeitDetection.detectCF(image_arr,amount)
+        if amount <= 0 or result:
             print("rejected")
             for i in range(400):
                 motorcontrol.motor_bwd()
@@ -105,7 +106,7 @@ def Transaction(json_data, com_queue):
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
             
             # display amount left to pay by customer on LCD
-            lcd_control.LCD_display_amount_due(cost)
+            #lcd_control.LCD_display_amount_due(cost)
 
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})

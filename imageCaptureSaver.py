@@ -9,7 +9,7 @@ import time
 
 global imageCount
 imageCount = 1
-path = "./val/finalVal/real"
+path = "./val/finalVal/"
 WARM_UP_TIME = 0.25
 
 camera = Picamera2()
