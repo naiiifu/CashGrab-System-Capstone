@@ -2,7 +2,7 @@ from gpiozero import DistanceSensor
 import time
 
 
-TRIG_PIN = 6
+TRIG_PIN = 2
 ECHO_PIN = 13
 
 TRIG_PIN2 = 3
