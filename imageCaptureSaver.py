@@ -7,7 +7,9 @@ import numpy as np
 from picamera2 import Picamera2  
 import time
 
-imageCount = 69
+global imageCount
+imageCount = 1
+path = "./val/finalVal/real"
 WARM_UP_TIME = 0.25
 
 camera = Picamera2()
@@ -31,6 +33,25 @@ def CaptureImage():
 	
 	return array
     
+
+def singlePhoto():
+	global imageCount
+	endLoop = False 
+	while not endLoop:
+		frame = CaptureImage()
+		cv.imshow("Frame", frame)
+		
+		key = cv.waitKey(0)
+		
+		print(key)
+		
+		if key == 99: #lowecase c
+			cv.imwrite(os.path.join(path,'real{}.png'.format(imageCount)), frame)
+			imageCount = imageCount + 1
+		elif key == 27: #esc
+			endLoop = True
+		cv.destroyAllWindows()
+
 if __name__ == '__main__':
 	endLoop = False
 	while not endLoop:
@@ -42,7 +63,7 @@ if __name__ == '__main__':
 		print(key)
 		
 		if key == 99: #lowecase c
-			cv.imwrite('dfake{}.png'.format(imageCount), frame)
+			cv.imwrite('real{}.png'.format(imageCount), frame)
 			imageCount = imageCount + 1
 		elif key == 27: #esc
 			endLoop = True
