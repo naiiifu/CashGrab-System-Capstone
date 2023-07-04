@@ -204,6 +204,10 @@ def uncalculated_detectCF(imgArr):
 
 
 def detectCF(inputImage,value):
+    if value < 5:
+        #if DEBUG_MODE:
+        #print("Bill not detected!")
+        return True, -1
     if DEBUG_MODE:
         cv2.namedWindow("input", cv2.WINDOW_NORMAL)
         cv2.resizeWindow("input", 800, 600)
@@ -213,10 +217,7 @@ def detectCF(inputImage,value):
     
     #currencyDetection.SetUp(validationPath) enable if this isnt run being after currency detection fro some reason
     #inputImage = cv2.imread(inputImagePath)
-    if value < 5:
-        #if DEBUG_MODE:
-        #print("Bill not detected!")
-        return True, -1
+   
     
     affineTransform = currencyDetection.getAffineTransform()
     referenceIndex = currencyDetection.getMatchIndex()
