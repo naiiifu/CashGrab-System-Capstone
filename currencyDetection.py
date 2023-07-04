@@ -6,6 +6,7 @@ import counterfeitDetection
 import csv
 import cProfile
 import pstats, io
+import counterfeitDetection
 from pstats import SortKey
 
 pr = cProfile.Profile()
@@ -31,6 +32,7 @@ global keyValues
 global keyKeypoints
 global keyDescriptors
 global keyColorHists
+
 global points
 
 keyImages = []
