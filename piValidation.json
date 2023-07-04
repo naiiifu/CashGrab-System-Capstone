@@ -1,27 +1,65 @@
 {
     "1": {
-        "front": "./val/piVal/14.png",
-        "back": "./val/piVal/17.png",
-        "value": 5
+        "front": "./val/finalVal/real/real2.png",
+        "back": "./val/finalVal/real/real3.png",
+        "value": 5,
+        "points": {
+            "front": [[230,100],[225,796],[640,811],[660,69]],
+            "back": [[1228,72],[1231,811],[1634,804],[1653,86]]
+        }
     },
     "2": {
-        "front": "./val/piVal/22.png",
-        "back": "./val/piVal/24.png",
-        "value": 10
+        "front": "./val/finalVal/real/real6.png",
+        "back": "./val/finalVal/real/real9.png",
+        "value": 10,
+        "points": {
+            "front": [[224,100],[216,799],[619,820],[652,67]],
+            "back": [[213,96],[216,796],[628,813],[628,76]]
+        }
     },
     "3": {
-        "front": "./val/piVal/30.png",
-        "back": "./val/piVal/31.png",
-        "value": 20
+        "front": "./val/finalVal/real/real11.png",
+        "back": "./val/finalVal/real/real14.png",
+        "value": 10,
+        "points": {
+            "front": [[261,98],[271,808],[636,808],[638,72]],
+            "back": [[1248,72],[1264,818],[1629,799],[1627,94]]
+        }
     },
     "4": {
-        "front": "./val/piVal/46.png",
-        "back": "./val/piVal/48.png",
-        "value": 50
+        "front": "./val/finalVal/real/real17.png",
+        "back": "./val/finalVal/real/real19.png",
+        "value": 50,
+        "points": {
+            "front": [[254,79],[276,811],[686,823],[681,69]],
+            "back": [[252,100],[267,804],[686,820],[693,55]]
+        }
     },
     "5": {
-        "front": "./val/piVal/62.png",
-        "back": "./val/piVal/64.png",
-        "value": 100
+        "front": "./val/finalVal/real/real20.png",
+        "back": "./val/finalVal/real/real22.png",
+        "value": 10,
+        "points": {
+            "front": [[1284,86],[1274,804],[1593,796],[1627,103]],
+            "back": [[254,88],[276,801],[616,808],[628,60]]
+        }
+    },
+    "6": {
+        "front": "./val/finalVal/real/real24.png",
+        "back": "./val/finalVal/real/real27.png",
+        "value":20 ,
+        "points": {
+            "front": [[254,88],[252,799],[657,808],[667,64]],
+            "back": [[1262,76],[1255,808],[1646,794],[1660,115]]
+        }
+    },
+    "7": {
+        "front": "./val/finalVal/real/real29.png",
+        "back": "./val/finalVal/real/real33.png",
+        "value": 100,
+        "points": {
+            "front": [[240,96],[244,796],[664,816],[676,62]],
+            "back": [[1252,76],[1243,808],[1624,799],[1660,100]]
+        }
     }
 }
