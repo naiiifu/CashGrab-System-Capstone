@@ -3,6 +3,7 @@ import currencyInsertionDetector
 import motorcontrol
 import imageCaptureSaver
 import currencyDetection
+import lcd_control 
 import socketio
 import threading
 import queue
@@ -102,6 +103,10 @@ def Transaction(json_data, com_queue):
         else:
             cost = cost - amount
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
+            
+            # display amount left to pay by customer on LCD
+            lcd_control.LCD_display_amount_due(cost)
+
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})
             for i in range(160):
