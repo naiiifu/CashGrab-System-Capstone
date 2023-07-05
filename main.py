@@ -10,6 +10,8 @@ import queue
 import time
 import numpy as np
 from datetime import datetime
+import cv2 as cv
+
 
 WEB_APP = 0
 CREATE_VALIDATION_SET = False
@@ -19,6 +21,8 @@ CREATE_VALIDATION_SET = False
 cancel_flag = threading.Event()
 
 def Transaction(json_data, com_queue):
+    imageCount = 0
+
     data = json.loads(json_data)
     cost = data['cost']
 
@@ -94,6 +98,10 @@ def Transaction(json_data, com_queue):
             imageCaptureSaver.singlePhoto()
 
         image_arr = imageCaptureSaver.CaptureImage()
+        cv.imwrite('sensors{}.png'.format(imageCount), image_arr)
+        imageCount = imageCount + 1
+        cv.destroyAllWindows()
+
         (amount, error) = currencyDetection.Detect(image_arr)
 
         if amount <= 0:
@@ -105,7 +113,7 @@ def Transaction(json_data, com_queue):
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
             
             # display amount left to pay by customer on LCD
-            lcd_control.LCD_display_amount_due(cost)
+            # lcd_control.LCD_display_amount_due(cost)
 
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})
