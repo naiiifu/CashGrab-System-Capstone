@@ -12,12 +12,51 @@ import time
 import numpy as np
 from datetime import datetime
 
+import cv2 as cv
+
 WEB_APP = 0
 CREATE_VALIDATION_SET = False
 
 
 # Cancellation flag for child thread
 cancel_flag = threading.Event()
+
+def SensorMotorLoop(csvWriter = None):
+    secondsSinceLastStop = 100
+    timeMotorResumed = 0
+
+    # distance between sensor and the bill on the conveyor belt is 4.8cm
+    # new value chosen based on data taken from the sensors. ask me if u want to see the data -chris
+    MIN_DISTANCE_IN_M1 = 0.06
+    MIN_DISTANCE_IN_M2 = 0.06
+    count_threshold1 = 1
+    count_threshold2 = 1
+    
+    startTime = datetime.now().timestamp()
+
+    while not cancel_flag.is_set():
+        secondsSinceLastStop = datetime.now().timestamp() - timeMotorResumed
+
+        sampleTime = datetime.now().timestamp()
+        sensor1Dist = currencyInsertionDetector.get_distance_sensor1()
+        sensor2Dist = currencyInsertionDetector.get_distance_sensor2()
+
+        if (
+            sensor1Dist <= MIN_DISTANCE_IN_M1 and
+            sensor2Dist <= MIN_DISTANCE_IN_M2
+        ):
+            print("detected")
+
+            # very hacky. determined through binary search and trial and error
+            # feel free to change if need be -chris
+            time.sleep(17/64)
+
+            motorcontrol.stop_motor()
+            detectTime = datetime.now().timestamp()
+            timeMotorResumed = datetime.now().timestamp()
+            break
+        
+        motorcontrol.motor_fwd()
 
 def Transaction(json_data, com_queue):
     data = json.loads(json_data)
@@ -35,56 +74,7 @@ def Transaction(json_data, com_queue):
     sensor2_measurements = np.zeros(NUM_MEASUREMENTS)
 
     while True:
-        secondsSinceLastStop = 100
-        timeMotorResumed = 0
-
-        # distance between sensor and the bill on the conveyor belt is 4.8cm
-        MIN_DISTANCE_IN_M1 = 0.04
-        MIN_DISTANCE_IN_M2 = 0.04
-        count_threshold1 = 7
-        count_threshold2 = 7
-
-        while not cancel_flag.is_set():
-            secondsSinceLastStop = datetime.now().timestamp() - timeMotorResumed
-
-            # Retrieve distance measurements and store in arrays
-            #sensor1_measurements[:-1] = sensor1_measurements[1:]
-            #sensor2_measurements[:-1] = sensor2_measurements[1:]
-            #sensor1_measurements[-1] = currencyInsertionDetector.get_distance_sensor1()
-            #sensor2_measurements[-1] = currencyInsertionDetector.get_distance_sensor2()
-
-            # Apply filtering techniques (e.g., moving average)
-            #sensor1_filtered = np.mean(sensor1_measurements)
-            #sensor2_filtered = np.mean(sensor2_measurements)
-            print("*****")
-            print(currencyInsertionDetector.get_distance_sensor1())
-            print(currencyInsertionDetector.get_distance_sensor2())
-            print("*****")
-            if currencyInsertionDetector.get_distance_sensor1() < MIN_DISTANCE_IN_M1:
-                sensor1_counter += 1
-            else:
-                sensor1_counter = 0
-
-            if currencyInsertionDetector.get_distance_sensor2() < MIN_DISTANCE_IN_M2:
-                sensor2_counter += 1
-            else:
-                sensor2_counter = 0
-
-            if (
-                sensor1_counter >= count_threshold1 and
-                sensor2_counter >= count_threshold2
-                #sensor1_filtered < MIN_DISTANCE_IN_M1 and
-                #sensor2_filtered < MIN_DISTANCE_IN_M2
-            ):
-                print("detected")
-                detectTime = datetime.now().timestamp()
-                motorcontrol.stop_motor()
-                timeMotorResumed = datetime.now().timestamp()
-                break
-
-
-
-            motorcontrol.motor_fwd()
+        SensorMotorLoop()
 
         if cancel_flag.is_set():
             motorcontrol.cleanup()
