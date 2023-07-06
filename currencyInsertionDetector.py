@@ -2,10 +2,10 @@ from gpiozero import DistanceSensor
 import time
 
 
-TRIG_PIN = 2
+TRIG_PIN = 6
 ECHO_PIN = 13
 
-TRIG_PIN2 = 3
+TRIG_PIN2 = 4
 ECHO_PIN2 = 14  
 
 ultrasonic = DistanceSensor(echo=ECHO_PIN, trigger=TRIG_PIN)

@@ -61,6 +61,7 @@ def SensorMotorLoop(csvWriter = None):
 def Transaction(json_data, com_queue):
     data = json.loads(json_data)
     cost = data['cost']
+    lcd_control.LCD_display_amount_due(cost)
 
     # Counters for distance_sensor1 and distance_sensor2
     sensor1_counter = 0
@@ -96,7 +97,7 @@ def Transaction(json_data, com_queue):
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
             
             # display amount left to pay by customer on LCD
-            #lcd_control.LCD_display_amount_due(cost)
+            lcd_control.LCD_display_amount_due(cost)
 
             if WEB_APP:
                 sio.emit('result', {"inserted": amount})
