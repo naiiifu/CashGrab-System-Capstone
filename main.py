@@ -101,6 +101,14 @@ def Transaction(json_data, com_queue):
         print("going to payment update")
         if amount <= 0 or result:
             print("rejected")
+            # Get the current timestamp
+            timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
+            # Create the filename using the timestamp
+            filename = f"Rejected_{timestamp}.jpg"
+            # Set the directory path
+            directory = "/home/admin/Desktop/Image_Captures/"
+            # Save the image with the timestamped name
+            cv.imwrite(directory + filename, image_arr)
             # for i in range(400):
             #     motorcontrol.motor_bwd()
             for i in range(160):
@@ -118,7 +126,7 @@ def Transaction(json_data, com_queue):
                 # Get the current timestamp
                 timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                 # Create the filename using the timestamp
-                filename = f"{timestamp}.jpg"
+                filename = f"Accepted_{amount}_{timestamp}.jpg"
                 # Set the directory path
                 directory = "/home/admin/Desktop/Image_Captures/"
                 # Save the image with the timestamped name
