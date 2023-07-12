@@ -130,7 +130,7 @@ def Transaction(json_data, com_queue):
                 # print('data')
                 
                 # sio.emit('image', data)
-                time.sleep(2)
+                # time.sleep(2)
                 sio.emit('result', {"inserted": amount})                
 
                 # print("waiting on port 3001")
