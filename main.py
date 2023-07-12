@@ -11,15 +11,19 @@ import queue
 import time
 import numpy as np
 from datetime import datetime
+import base64
+import time
+
 
 import cv2 as cv
 
-WEB_APP = 0
+WEB_APP = 1
 CREATE_VALIDATION_SET = False
 
 
 # Cancellation flag for child thread
 cancel_flag = threading.Event()
+
 
 def SensorMotorLoop(csvWriter = None):
     secondsSinceLastStop = 100
@@ -78,20 +82,29 @@ def Transaction(json_data, com_queue):
         SensorMotorLoop()
 
         if cancel_flag.is_set():
-            motorcontrol.cleanup()
+            motorcontrol.stop_motor()
             cancel_flag.clear()
             break
 
+        print("start image capture")
         if CREATE_VALIDATION_SET:
             imageCaptureSaver.singlePhoto()
 
         image_arr = imageCaptureSaver.CaptureImage()
+
+        print("start currecny value detection")
         (amount, error) = currencyDetection.Detect(image_arr)
+
+        print("start counterfeit detection")
         (result, percent) = counterfeitDetection.detectCF(image_arr,amount)
+
+        print("going to payment update")
         if amount <= 0 or result:
             print("rejected")
-            for i in range(400):
-                motorcontrol.motor_bwd()
+            # for i in range(400):
+            #     motorcontrol.motor_bwd()
+            for i in range(160):
+                motorcontrol.motor_fwd()
         else:
             cost = cost - amount
             print(f'Accepted: {amount}. Amount left to pay: {cost}')
@@ -100,7 +113,20 @@ def Transaction(json_data, com_queue):
             lcd_control.LCD_display_amount_due(cost)
 
             if WEB_APP:
-                sio.emit('result', {"inserted": amount})
+                #image = imageCaptureSaver.CaptureImage()
+                #image = currencyDetection.DownScale(image, 16)
+                cv.imwrite("pic.jpg", image_arr)
+                myImg = cv.imread("pic.jpg")
+                frame = cv.imencode('.jpg', myImg)[1]
+                data = base64.b64encode(frame)
+                # print('data')
+                
+                sio.emit('image', data)
+                time.sleep(2)
+                sio.emit('result', {"inserted": amount})                
+
+                # print("waiting on port 3001")
+                # sio.wait()
             for i in range(160):
                 motorcontrol.motor_fwd()
             for i in range(60):
@@ -127,13 +153,27 @@ if __name__ == "__main__":
 
     else:
         # Initialize the Socket.io client
-        sio = socketio.Client()
-        sio.connect('http://142.58.165.151:8080')
+        while True:
+            try:
+                # Initialize the Socket.io client
+                sio = socketio.Client()
+                sio.connect('http://localhost:8080', namespaces=['/'])
+                print("Connected\n")
+
+                
+                # Connection successful, break the loop
+                break
+            except Exception as e:
+                # Connection failed, print error and retry after a delay
+                print(f"Connection failed: {str(e)}")
+                print("Retrying in 3 minutes...")
+                time.sleep(180)
         
         @sio.on('cancel')
         def handle_cancel(msg):                                         
            print(f'cancel msg: {msg}')
            cancel_flag.set()
+
 
         # Define a callback function to handle the 'json' event
         @sio.on('json')

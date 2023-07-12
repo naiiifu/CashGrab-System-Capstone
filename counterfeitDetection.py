@@ -17,9 +17,10 @@ validationPath = "./piValidation.json"
 
 DEBUG_MODE = True
 
+
 THRESHOLD_VALUE = 60
-PERCENT_TOLERANCE = 0.7
-PERCENT_RANGE = 0.3
+#PERCENT_TOLERANCE = 0.7
+PERCENT_RANGE = 0.64350938169
 
 def imgSplitHrz(img):
     h, w, channels = img.shape
@@ -91,8 +92,10 @@ def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smt
     if(input <= upperlimit and input >= lowerlimit):
         return False, percentdiff
     else:
-        if DEBUG_MODE:
-            print("Rejected with similairty {}".format(percentdiff))
+        #if DEBUG_MODE:
+        #print("Rejected with similairty {}".format(percentdiff))
+        print(f"counted: {input} outside threshold lower: {lowerlimit}, uppe: {upperlimit}")
+        print(f"percet value {abs(input / reference - 1)}")
     return True , percentdiff
 
 # def checkCounterfeit_percent(input,reference):#baseline is list of tuples or smth?? or better it is only for the identified bill denomination
@@ -206,14 +209,17 @@ def uncalculated_detectCF(imgArr):
 def detectCF(inputImage,value):
     if value < 5:
         #if DEBUG_MODE:
-        #print("Bill not detected!")
+        print("Bill not detected!")
         return True, -1
     if DEBUG_MODE:
-        cv2.namedWindow("input", cv2.WINDOW_NORMAL)
-        cv2.resizeWindow("input", 800, 600)
-        cv2.imshow("input",inputImage)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        {}
+        # print("debug output image")
+        # cv2.namedWindow("input", cv2.WINDOW_NORMAL)
+        # cv2.resizeWindow("input", 800, 600)
+        # cv2.imshow("input",inputImage)
+        # cv2.waitKey(0)
+        # cv2.destroyAllWindows()
+        # print("debug end output image")
     
     #currencyDetection.SetUp(validationPath) enable if this isnt run being after currency detection fro some reason
     #inputImage = cv2.imread(inputImagePath)
@@ -234,10 +240,11 @@ def detectCF(inputImage,value):
     
     #return checkCounterfeit_percent(countInput,countBaseline)
     if DEBUG_MODE:
-        cv2.imshow("reference", referenceWindow)
-        cv2.imshow("input", inputWindow)
-        cv2.waitKey(0)
-        cv2.destroyAllWindows()
+        {}
+        #cv2.imshow("reference", referenceWindow)
+        #cv2.imshow("input", inputWindow)
+        #cv2.waitKey(0)
+        #cv2.destroyAllWindows()
     (result, percent) = checkCounterfeit_percent(countInput,countBaseline)
     return result, percent
 
