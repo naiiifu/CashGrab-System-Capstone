@@ -116,7 +116,7 @@ def Transaction(json_data, com_queue):
                 #image = imageCaptureSaver.CaptureImage()
                 #image = currencyDetection.DownScale(image, 16)
                 # Get the current timestamp
-                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                timestamp = datetime.now().strftime("%Y%m%d%H%M%S")
                 # Create the filename using the timestamp
                 filename = f"{timestamp}.jpg"
                 # Set the directory path
