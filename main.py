@@ -115,13 +115,21 @@ def Transaction(json_data, com_queue):
             if WEB_APP:
                 #image = imageCaptureSaver.CaptureImage()
                 #image = currencyDetection.DownScale(image, 16)
-                cv.imwrite("pic.jpg", image_arr)
-                myImg = cv.imread("pic.jpg")
-                frame = cv.imencode('.jpg', myImg)[1]
-                data = base64.b64encode(frame)
+                # Get the current timestamp
+                timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
+                # Create the filename using the timestamp
+                filename = f"{timestamp}.jpg"
+                # Set the directory path
+                directory = "/home/admin/Desktop/Image_Captures/"
+                # Save the image with the timestamped name
+                cv.imwrite(directory + filename, image_arr)
+                # cv.imwrite("pic.jpg", image_arr)
+                # myImg = cv.imread("pic.jpg")
+                # frame = cv.imencode('.jpg', myImg)[1]
+                # data = base64.b64encode(frame)
                 # print('data')
                 
-                sio.emit('image', data)
+                # sio.emit('image', data)
                 time.sleep(2)
                 sio.emit('result', {"inserted": amount})                
 
