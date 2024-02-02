@@ -1,1 +1,149 @@
 # CashGrab-System-Capstone
+CashGrabbyPaymentPeers
+CashGrabisaCanadianpoint-of-saledevicedesignedandmanufacturedinBritishColumbia,Canada.The
+company’sfirstproduct,CashGrab,isanautomatedandsecurecashpaymentsystemdesignedspecifically
+forstreetfoodvendorsandisexpectedtoretailfor$ 1000 CADperunit.TheCompanyisprojectedtoachieve
+revenue and profitof$ 650,000 CADand $ 15,000 CAD, respectively, after oneyearofoperation.The
+companyisaskingfor$10,000tocoverthecostofR&D,tomanufactureaprototype,andwillseekthis
+amountfromfamily,friends,andavailablegrants.
+
+TheProblem
+
+RetailCanadianbusinesseslose$1.4Billioninrevenueeachyearduetoemployeetheft.Thislossofrevenue
+duetotheftisespeciallyprevalentinrestaurants,asemployeeshaveliberalaccesstothebusiness’cash
+registers.Foodcontaminationisanothernotablesourceofrevenuelossforrestaurants.Restaurantscan
+encounterlossesofupto$1.9MillionUSDduetoasinglefoodcontaminationoutbreak.Foodcontamination
+isofparticularconcernforfoodtrucksasthelimitednumberofemployeesworkinginthefoodtruckmay
+needtohandlethecashregister,andfoodpreparationatthesametime.Duringbusyhoursemployeesmay
+nothavethetimetoproperlywashtheirhandsbetweentouchingcashandpreparingfood,leadingtofood
+contaminationrisk.
+
+TheSolution
+
+CashGrab isanautomated point-of-sale devicethat facilitatescashtransactions withoutthe need for
+employeestodirectlyinteractwithbanknotes.CashGraballowsemployeestoinputtransactions,prompt
+customer payment, andautomatically facilitatescash payment,detection, and storage.CashGrabalso
+providesaninterfaceformanagerstoobtainsalesandrevenueinformation,andtoretrievestoredcash.
+
+TheScope
+
+ThescopeofthegammaprototypeofCashGrabfocusesonfivemaincriteria:size,robustness,accuracy,
+speed,andsecurity.Thedevice’ssizeshouldbesmallenoughtocomfortablyfitonthecashiercounterofa
+foodtruck.ThedeviceshouldonlyacceptauthenticmoderniterationsofCanadianbanknotes.Thedevice
+will be able to correctly identify banknotes with an accuracy of 90%, whilerejecting unidentifiable
+banknotes. The10%errorwillmostlyconsistofrejectingauthenticCanadianbanknotestoensurethat
+almost nocounterfeit banknoteswill be accepted.The devicewill rejectclearly counterfeitCanadian
+banknotessuchasbanknotesprintedfromahighqualityconsumerprinter.Thedeviceshouldbeableto
+processinsertedbanknotesin 20 secondsperbanknoteonaverage.Thedevicewillbeabletobesecuredto
+thefoodtruck,andthedevice'scashstorageshouldbelockable.Additionally,thedevice’scasingshouldbe
+durable,andnoteasilybrokeninto.
+
+TestPlan
+Objective: Evaluatethebasicfunctionalityandreliabilityofthedeviceundervariouscircumstances.
+Environment: Indoorenvironmentwiththedeviceplacedonatable.
+Participants: Twousers-oneactingasacustomerandtheotherasacashier,bothusingtheoperations
+manual.
+
+DeadlinetosubmitthefinalreportJuly 30 thMidnight
+TestScenarios:
+
+Transaction
+Initiation
+● Test: Verifythedevice'sabilitytoinitiateatransactionthroughthecashierinterface.
+● Procedure: Thecashierwillinitiateasampletransactionusingthecashierinterface.
+Timing
+Constraints
+● Test: Ensurethedevicemeetstimingconstraintsduringatransaction.
+● Procedure: Executeasimpletransactionwhiletimingthedevicebillprocessingtime.
+Counterfeit
+Detection
+● Test: Testtherobustnessofthedevice'scounterfeitdetection.
+● Procedure: Executeatransactionwithdifferentbilldenominations,includinghalfofthe
+billsbeingfake,insertedinanarbitraryorder.
+Theft
+Attempt
+● Test: Verifythedevice'ssecurityagainsttheftattempts.
+● Procedure: Afteracompletedtransaction,auserwillattempttobreakintothedevice
+usingmoderateforcetostealthemoney.
+Money
+Retrieval
+● Test: Validatethedevice'skeyaccessformoneyretrieval.
+● Procedure: Thecashierwillretrievethemoneyfromthedeviceusingthedesignatedkey
+accessafterthefailedtheftattempt.
+TheOpportunity
+
+TheAmericanand Canadianmarketshada totalof 36,324and2,622 operatingfood trucksin 2023,
+employingatotalof43,601and3,423individualsrespectively.TheCompanyestimatesastartingpriceof
+$ 1,000 CAD per unit will be sufficient to cover material costs ($605/device), manufacturing labour
+($20/device),marketing($10/device),withaprofitmarginof 36.5 %($ 365 /device).Additionally,wefactorin
+annualsalariesof$28,000pergroupmember($168,000total)and$20,000ininitialsetupcosts.Assuming
+thatourcompanymanagestosellroughly 654 unitsafterthefirstyearofoperation,andconsideringthe
+approximateunitpriceof$ 1,000 CADperdevice,itisestimatedthatourproductwillachieve$ 654,000 CAD
+inrevenueand$ 14,730 CADinprofit.
+
+CompetitiveAdvantage
+
+Ourproduct,CashGrab,offersanaffordable,compact,andportabledesign,makingitanexcellentchoicefor
+smallbusinesseslikefoodtrucks.Unlikemanyotherpoint-of-salesystems,CashGrabincludesautonomous
+cashtransactionfeatureswithoutbeinglargeorheavy.CashGrabispricedtoundercutcompetition,selling
+for $1,000 ,comparedtocompetingdevicesthatsellforapproximately $2,000 .Additionally,CashGrabwill
+notrequireasubscriptionfee,deliveringadditionalcostsavingsovercompetingdevices.Finally,ourproduct
+prioritizesserviceability,andprovidesaccessibleself-repairinstructions.
+
+Financials
+
+Wewillprovideinitialclientswithdiscountsonourdevices,prioritizinggrowthandconnectionsoverinitial
+profits.Afterwehaveestablishedour marketpresence,wewilltrytoattainlucrativepartnershipswith
+businesseslikePNE,CalgaryStampedetoexpandourbusinessoutsidefoodtrucks.Duetoseasonalbusiness
+fluctuationswewillbemoreprofitableinthesummerratherthanthewinter.ThisisshowninourP/L
+StatementandFinancialSummarybelow.ForfullfinancialprojectionsseeAppendixC.
+
+DeadlinetosubmitthefinalreportJuly 30 thMidnight
+PredictedFinancialSummary:
+Jan-23 Apr-23 Jul-23 Oct-23 Jan-24 Apr-24 Jul-24 Oct-
+TotalRevenue $3,200 $30,000 $100,000 $50,000 $50,000 $47,000 $200,000 $55,
+CostofSales $2,420 $18,150 $60,500 $30,250 $30,250 $28,435 $121,000 $33,
+Expenses $18,200 $19,100 $24,650 $19,100 $21,600 $20,600 $20,350 $19,
+NetOperatingIncome -$17,420 -$7,250 $14,850 $650 -$1,850 -$2,035 $58,650 $2,
+
+TheTeam
+
+Theteamiscomposedofsixfourthandfifthyearengineeringstudentsincomputer,electronics,andsystems
+engineeringconcentrationsatSFU’sBurnabycampus.Theteamisfurtherorganizedintosubteamsincluding
+computervision(CTOChrisRosenauer,CCODakotaCrozier),web-baseduserinterface(CIOAbdulKhan),and
+mechanicaldesign(CFOJaydonVanloo,COOJeremyAng,CEOJacobForrest).Ourteammemberspossessa
+diverserangeofskillsandexperiencesthatcontributetooursuccessincluding:professionalexperiencein
+thefoodtruckindustry,experiencewithcomputervision,andexperiencewithwebdevelopment.
+
+TheClient
+
+Our client,Jason Au,isthe ownerandoperator ofTinLizzyConcessions.Jasonhasover 20 yearsof
+experienceintheindustry.Webelievethatourproduct,CashGrab,canprovidesignificantbenefitstoTin
+LizzyConcessionsbysubstitutingthetraditionalcashregister,therebyreducinghumanerror,theft,and
+cross-contaminationrisksinhisfoodtrucks.
+
+Ask
+
+Weareseeking$10,000infundingtodevelopaprototypewhichwillbeallocatedbetween(approximated
+values):researchanddesignoptimization($6,000),materialcostandmanufacturing($2,000),testingand
+documentation($1,000),andproductandsoftwaremaintenance($1,000).
+
+DemoLearningOutcome&FutureSteps
+
+CashGrab’sdemonstrationgaveusinsightastothedifferencesbetweenhowweexpectourdevicetobe
+usedandhowusersusethedevice,andthereactionofusersregardingdevicefailure.Mostnotability:
+
+● Thedeviceshouldberobustwithrespecttohowtheuserusesthedevice;usersinsertedbanknotes
+atagreaterfrequencythanwehadanticipatedleadingtodeviceerror
+● Restartingthedeviceuponfailurewasnotanobviousconclusion,aswehadassumed
+CashGrab’sdemonstrationprovidedinsightastohowthedevicecouldbeimproved,specificallywithregards
+toversatility,usability,andpresentation.FutureiterationsofCashGrabcouldbeimprovedwiththefollowing
+changes:
+
+● Fixingacrashthatoccurswhenusersinsertmultiplebanknotesinfastsuccession
+● Addinguserfeedbacktoindicatewhenanerrorhasoccurredorcounterfeitbilldetected
+● Addingtroubleshootingstepstotheusermanualforunrecoverableerrors
+● Automatingthedevice’ssoftwarestartuptooccuruponthedevicebeingturnedon
+● Alteringthedevicetosecurecablesinternallytocircumventtheneedforcablesecuringziptiestobe
+visiblefromoutsidethedevice
+DeadlinetosubmitthefinalreportJuly 30 thMidnight
