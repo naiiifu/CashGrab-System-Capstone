@@ -1,149 +1,16 @@
-# CashGrab-System-Capstone
-CashGrabbyPaymentPeers
-CashGrabisaCanadianpoint-of-saledevicedesignedandmanufacturedinBritishColumbia,Canada.The
-company’sfirstproduct,CashGrab,isanautomatedandsecurecashpaymentsystemdesignedspecifically
-forstreetfoodvendorsandisexpectedtoretailfor$ 1000 CADperunit.TheCompanyisprojectedtoachieve
-revenue and profitof$ 650,000 CADand $ 15,000 CAD, respectively, after oneyearofoperation.The
-companyisaskingfor$10,000tocoverthecostofR&D,tomanufactureaprototype,andwillseekthis
-amountfromfamily,friends,andavailablegrants.
+# CashGrab-System
+Video Demonstration: https://www.youtube.com/watch?v=CsshI4wKIHE
 
-TheProblem
+See the Operation_Manual.pdf for graphics and instructions on how to use the prototype device!
+The prototype device was successfully completed on July 25th for our Capstone Project at Simon Fraser University. 
+Team: Dakota Crozier, Christopher Rosenauer, Abdul Kahn, Jaydon Vanloo, Jeremy Ang, Jacob Forrest.
 
-RetailCanadianbusinesseslose$1.4Billioninrevenueeachyearduetoemployeetheft.Thislossofrevenue
-duetotheftisespeciallyprevalentinrestaurants,asemployeeshaveliberalaccesstothebusiness’cash
-registers.Foodcontaminationisanothernotablesourceofrevenuelossforrestaurants.Restaurantscan
-encounterlossesofupto$1.9MillionUSDduetoasinglefoodcontaminationoutbreak.Foodcontamination
-isofparticularconcernforfoodtrucksasthelimitednumberofemployeesworkinginthefoodtruckmay
-needtohandlethecashregister,andfoodpreparationatthesametime.Duringbusyhoursemployeesmay
-nothavethetimetoproperlywashtheirhandsbetweentouchingcashandpreparingfood,leadingtofood
-contaminationrisk.
+## The Problem
+Retail Canadian businesses lose $1.4 Billion in revenue each year due to employee theft. This loss of revenue due to theft is especially prevalent in restaurants, as employees have liberal access to the business’ cash registers. Food contamination is another notable source of revenue loss for restaurants. Restaurants can encounter losses of up to $1.9 Million USD due to a single food contamination outbreak. Food contamination is of particular concern for food trucks as the limited number of employees working in the food truck may need to handle the cash register, and food preparation at the same time. During busy hours employees may not have the time to properly wash their hands between touching cash and preparing food, leading to food contamination risk.
 
-TheSolution
+## The Solution
+CashGrab is an automated point-of-sale device that facilitates cash transactions without the need for employees to directly interact with bank notes. CashGrab allows employees to input transactions, prompt customer payment, and automatically facilitates cash payment, detection, and storage. CashGrab also provides an interface for managers to obtain sales and revenue information, and to retrieve stored cash.
 
-CashGrab isanautomated point-of-sale devicethat facilitatescashtransactions withoutthe need for
-employeestodirectlyinteractwithbanknotes.CashGraballowsemployeestoinputtransactions,prompt
-customer payment, andautomatically facilitatescash payment,detection, and storage.CashGrabalso
-providesaninterfaceformanagerstoobtainsalesandrevenueinformation,andtoretrievestoredcash.
+## The Scope
+The scope of the  prototype of CashGrab focuses on five main criteria: size, robustness, accuracy, speed, and security. The device’s size should be small enough to comfortably fit on the cashier counter of a food truck. The device should only accept authentic modern iterations of Canadian banknotes. The device will be able to correctly identify banknotes with an accuracy of 90%, while rejecting unidentifiable banknotes. The 10% error will mostly consist of rejecting authentic Canadian banknotes to ensure that almost no counterfeit banknotes will be accepted. The device will reject clearly counterfeit Canadian banknotes such as banknotes printed from a high quality consumer printer. The device should be able to process inserted banknotes in 20 seconds per banknote on average. The device will be able to be secured to the food truck, and the device's cash storage should be lockable. Additionally, the device’s casing should be durable, and not easily broken into.
 
-TheScope
-
-ThescopeofthegammaprototypeofCashGrabfocusesonfivemaincriteria:size,robustness,accuracy,
-speed,andsecurity.Thedevice’ssizeshouldbesmallenoughtocomfortablyfitonthecashiercounterofa
-foodtruck.ThedeviceshouldonlyacceptauthenticmoderniterationsofCanadianbanknotes.Thedevice
-will be able to correctly identify banknotes with an accuracy of 90%, whilerejecting unidentifiable
-banknotes. The10%errorwillmostlyconsistofrejectingauthenticCanadianbanknotestoensurethat
-almost nocounterfeit banknoteswill be accepted.The devicewill rejectclearly counterfeitCanadian
-banknotessuchasbanknotesprintedfromahighqualityconsumerprinter.Thedeviceshouldbeableto
-processinsertedbanknotesin 20 secondsperbanknoteonaverage.Thedevicewillbeabletobesecuredto
-thefoodtruck,andthedevice'scashstorageshouldbelockable.Additionally,thedevice’scasingshouldbe
-durable,andnoteasilybrokeninto.
-
-TestPlan
-Objective: Evaluatethebasicfunctionalityandreliabilityofthedeviceundervariouscircumstances.
-Environment: Indoorenvironmentwiththedeviceplacedonatable.
-Participants: Twousers-oneactingasacustomerandtheotherasacashier,bothusingtheoperations
-manual.
-
-DeadlinetosubmitthefinalreportJuly 30 thMidnight
-TestScenarios:
-
-Transaction
-Initiation
-● Test: Verifythedevice'sabilitytoinitiateatransactionthroughthecashierinterface.
-● Procedure: Thecashierwillinitiateasampletransactionusingthecashierinterface.
-Timing
-Constraints
-● Test: Ensurethedevicemeetstimingconstraintsduringatransaction.
-● Procedure: Executeasimpletransactionwhiletimingthedevicebillprocessingtime.
-Counterfeit
-Detection
-● Test: Testtherobustnessofthedevice'scounterfeitdetection.
-● Procedure: Executeatransactionwithdifferentbilldenominations,includinghalfofthe
-billsbeingfake,insertedinanarbitraryorder.
-Theft
-Attempt
-● Test: Verifythedevice'ssecurityagainsttheftattempts.
-● Procedure: Afteracompletedtransaction,auserwillattempttobreakintothedevice
-usingmoderateforcetostealthemoney.
-Money
-Retrieval
-● Test: Validatethedevice'skeyaccessformoneyretrieval.
-● Procedure: Thecashierwillretrievethemoneyfromthedeviceusingthedesignatedkey
-accessafterthefailedtheftattempt.
-TheOpportunity
-
-TheAmericanand Canadianmarketshada totalof 36,324and2,622 operatingfood trucksin 2023,
-employingatotalof43,601and3,423individualsrespectively.TheCompanyestimatesastartingpriceof
-$ 1,000 CAD per unit will be sufficient to cover material costs ($605/device), manufacturing labour
-($20/device),marketing($10/device),withaprofitmarginof 36.5 %($ 365 /device).Additionally,wefactorin
-annualsalariesof$28,000pergroupmember($168,000total)and$20,000ininitialsetupcosts.Assuming
-thatourcompanymanagestosellroughly 654 unitsafterthefirstyearofoperation,andconsideringthe
-approximateunitpriceof$ 1,000 CADperdevice,itisestimatedthatourproductwillachieve$ 654,000 CAD
-inrevenueand$ 14,730 CADinprofit.
-
-CompetitiveAdvantage
-
-Ourproduct,CashGrab,offersanaffordable,compact,andportabledesign,makingitanexcellentchoicefor
-smallbusinesseslikefoodtrucks.Unlikemanyotherpoint-of-salesystems,CashGrabincludesautonomous
-cashtransactionfeatureswithoutbeinglargeorheavy.CashGrabispricedtoundercutcompetition,selling
-for $1,000 ,comparedtocompetingdevicesthatsellforapproximately $2,000 .Additionally,CashGrabwill
-notrequireasubscriptionfee,deliveringadditionalcostsavingsovercompetingdevices.Finally,ourproduct
-prioritizesserviceability,andprovidesaccessibleself-repairinstructions.
-
-Financials
-
-Wewillprovideinitialclientswithdiscountsonourdevices,prioritizinggrowthandconnectionsoverinitial
-profits.Afterwehaveestablishedour marketpresence,wewilltrytoattainlucrativepartnershipswith
-businesseslikePNE,CalgaryStampedetoexpandourbusinessoutsidefoodtrucks.Duetoseasonalbusiness
-fluctuationswewillbemoreprofitableinthesummerratherthanthewinter.ThisisshowninourP/L
-StatementandFinancialSummarybelow.ForfullfinancialprojectionsseeAppendixC.
-
-DeadlinetosubmitthefinalreportJuly 30 thMidnight
-PredictedFinancialSummary:
-Jan-23 Apr-23 Jul-23 Oct-23 Jan-24 Apr-24 Jul-24 Oct-
-TotalRevenue $3,200 $30,000 $100,000 $50,000 $50,000 $47,000 $200,000 $55,
-CostofSales $2,420 $18,150 $60,500 $30,250 $30,250 $28,435 $121,000 $33,
-Expenses $18,200 $19,100 $24,650 $19,100 $21,600 $20,600 $20,350 $19,
-NetOperatingIncome -$17,420 -$7,250 $14,850 $650 -$1,850 -$2,035 $58,650 $2,
-
-TheTeam
-
-Theteamiscomposedofsixfourthandfifthyearengineeringstudentsincomputer,electronics,andsystems
-engineeringconcentrationsatSFU’sBurnabycampus.Theteamisfurtherorganizedintosubteamsincluding
-computervision(CTOChrisRosenauer,CCODakotaCrozier),web-baseduserinterface(CIOAbdulKhan),and
-mechanicaldesign(CFOJaydonVanloo,COOJeremyAng,CEOJacobForrest).Ourteammemberspossessa
-diverserangeofskillsandexperiencesthatcontributetooursuccessincluding:professionalexperiencein
-thefoodtruckindustry,experiencewithcomputervision,andexperiencewithwebdevelopment.
-
-TheClient
-
-Our client,Jason Au,isthe ownerandoperator ofTinLizzyConcessions.Jasonhasover 20 yearsof
-experienceintheindustry.Webelievethatourproduct,CashGrab,canprovidesignificantbenefitstoTin
-LizzyConcessionsbysubstitutingthetraditionalcashregister,therebyreducinghumanerror,theft,and
-cross-contaminationrisksinhisfoodtrucks.
-
-Ask
-
-Weareseeking$10,000infundingtodevelopaprototypewhichwillbeallocatedbetween(approximated
-values):researchanddesignoptimization($6,000),materialcostandmanufacturing($2,000),testingand
-documentation($1,000),andproductandsoftwaremaintenance($1,000).
-
-DemoLearningOutcome&FutureSteps
-
-CashGrab’sdemonstrationgaveusinsightastothedifferencesbetweenhowweexpectourdevicetobe
-usedandhowusersusethedevice,andthereactionofusersregardingdevicefailure.Mostnotability:
-
-● Thedeviceshouldberobustwithrespecttohowtheuserusesthedevice;usersinsertedbanknotes
-atagreaterfrequencythanwehadanticipatedleadingtodeviceerror
-● Restartingthedeviceuponfailurewasnotanobviousconclusion,aswehadassumed
-CashGrab’sdemonstrationprovidedinsightastohowthedevicecouldbeimproved,specificallywithregards
-toversatility,usability,andpresentation.FutureiterationsofCashGrabcouldbeimprovedwiththefollowing
-changes:
-
-● Fixingacrashthatoccurswhenusersinsertmultiplebanknotesinfastsuccession
-● Addinguserfeedbacktoindicatewhenanerrorhasoccurredorcounterfeitbilldetected
-● Addingtroubleshootingstepstotheusermanualforunrecoverableerrors
-● Automatingthedevice’ssoftwarestartuptooccuruponthedevicebeingturnedon
-● Alteringthedevicetosecurecablesinternallytocircumventtheneedforcablesecuringziptiestobe
-visiblefromoutsidethedevice
-DeadlinetosubmitthefinalreportJuly 30 thMidnight
